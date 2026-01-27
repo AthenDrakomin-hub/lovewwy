@@ -1,0 +1,109 @@
+.collectionContainer {
+  width: 100%;
+  padding: 16px;
+  background-color: #1e293b;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.collectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #334155;
+}
+
+.collectionTitle {
+  margin: 0;
+  color: #e5e7eb;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.collectionControls {
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background-color: #1e293b;
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #00f2ff;
+  box-shadow: 0 0 0 2px rgba(0, 242, 255, 0.1);
+}
+
+.collectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.collectionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background-color: #1f2a3f;
+  transition: all 0.2s ease;
+}
+
+.collectionItem:hover {
+  border-color: #00f2ff;
+  background-color: rgba(0, 242, 255, 0.05);
+}
+
+.itemContent {
+  flex: 1;
+}
+
+.itemTitle {
+  margin: 0 0 4px 0;
+  color: #e5e7eb;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.itemDescription {
+  margin: 0 0 8px 0;
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.itemMeta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.itemSource {
+  color: #4ade80;
+}
+
+.itemTime {
+  color: #94a3b8;
+}
+
+.itemActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}

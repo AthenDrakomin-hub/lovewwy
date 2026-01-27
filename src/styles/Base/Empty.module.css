@@ -1,0 +1,42 @@
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.emptyImage {
+  font-size: 48px;
+  color: #334155;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyIcon {
+  line-height: 1;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #e5e7eb;
+}
+
+.emptyDescription {
+  font-size: 14px;
+  margin: 0 0 24px 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.emptyAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

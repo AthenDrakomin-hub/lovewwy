@@ -1,0 +1,261 @@
+/* ../styles/ApiUsageMonitor.module.css */
+/* 切换按钮：默认显示的悬浮按钮 */
+.apiMonitorToggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #ff9f43;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(255, 159, 67, 0.3);
+  transition: all 0.2s ease;
+}
+
+.apiMonitorToggle:hover {
+  background-color: #e68a33;
+  box-shadow: 0 4px 12px rgba(255, 159, 67, 0.4);
+  transform: translateY(-2px);
+}
+
+/* API监控面板：悬浮层，固定定位 */
+.apiUsageMonitor {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  width: 360px;
+  background-color: #111827;
+  color: #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  border: 1px solid #374151;
+  transition: all 0.3s ease;
+}
+
+/* 面板头部：标题 + 关闭按钮 */
+.monitorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #1f2937;
+  border-bottom: 1px solid #374151;
+}
+
+.monitorHeader h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ff9f43;
+}
+
+.closeButton {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 20px;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  color: #fff;
+  background-color: #374151;
+}
+
+/* 用量统计区域 */
+.usageStats {
+  padding: 16px;
+}
+
+/* 单个统计项 */
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #374151;
+}
+
+.statItem:last-of-type {
+  border-bottom: none;
+  margin-bottom: 16px;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.statValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+/* 警告样式：用量≥80%时生效 */
+.warning {
+  color: #f97316 !important;
+  font-weight: 700;
+}
+
+/* 用量进度条容器 */
+.usageBar {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  background-color: #374151;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+/* 进度条填充层 */
+.usageFill {
+  height: 100%;
+  background-color: #4ade80;
+  border-radius: 6px;
+  transition: width 0.5s ease-in-out;
+}
+
+/* 警告状态的进度条 */
+.usageFill.warning {
+  background-color: #f97316;
+  animation: pulse 1.5s infinite alternate;
+}
+
+/* 进度条百分比文字 */
+.usageText {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* 近期调用记录折叠面板 */
+.recentCalls {
+  padding: 0 16px;
+  border-top: 1px solid #374151;
+  margin-top: 8px;
+}
+
+.recentCalls summary {
+  padding: 16px 0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #d1d5db;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 隐藏原生折叠箭头 */
+.recentCalls summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 自定义折叠箭头 */
+.recentCalls summary::after {
+  content: '▼';
+  font-size: 12px;
+  color: #9ca3af;
+  transition: transform 0.2s;
+}
+
+.recentCalls[open] summary::after {
+  transform: rotate(180deg);
+}
+
+/* 调用记录列表 */
+.callList {
+  margin: 0 0 16px 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+/* 单个调用记录 */
+.callItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #374151;
+  color: #9ca3af;
+}
+
+.callItem:last-of-type {
+  border-bottom: none;
+}
+
+.callTime {
+  white-space: nowrap;
+}
+
+.callEndpoint {
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+/* 使用贴士区域 */
+.usageTips {
+  padding: 16px;
+  border-top: 1px solid #374151;
+  background-color: #1f2937;
+}
+
+.usageTips h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #ff9f43;
+}
+
+/* 贴士列表 */
+.tipsList {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #d1d5db;
+  line-height: 1.6;
+}
+
+.tipsList li {
+  margin-bottom: 4px;
+}
+
+.tipsList li:last-of-type {
+  margin-bottom: 0;
+}
+
+/* 通用动画：进度条脉冲（警告状态） */
+@keyframes pulse {
+  from { opacity: 0.8; }
+  to { opacity: 1; }
+}
+
+/* 响应式适配：小屏设备收缩面板宽度 */
+@media (max-width: 576px) {
+  .apiUsageMonitor {
+    width: calc(100vw - 32px);
+    left: 16px;
+    right: 16px;
+  }
+}

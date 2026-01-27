@@ -3,12 +3,12 @@ import { FetchHttpHandler } from "@smithy/fetch-http-handler";
 
 const PROJECT_REF = "zlbemopcgjohrnyyiwvs";
 const CONFIG = {
-  endpoint: process.env.SUPABASE_S3_ENDPOINT || `https://${PROJECT_REF}.storage.supabase.co/storage/v1/s3`,
-  region: process.env.SUPABASE_S3_REGION || "ap-south-1",
-  accessKeyId: process.env.SUPABASE_S3_ACCESS_KEY_ID || "2160ce870540fd08f2eb07263230d1c3",
-  secretAccessKey: process.env.SUPABASE_S3_SECRET_ACCESS_KEY || "3a8741980dd7fe3ba6b6cd3c8924484a9b665b547958680a10d835b9d0724ed4",
-  bucket: process.env.SUPABASE_S3_BUCKET || "wangyiyun",
-  functionUrl: process.env.SUPABASE_AUTH_URL || `https://${PROJECT_REF}.supabase.co/functions/v1/s3-auth`
+  endpoint: process.env.VITE_AWS_S3_ENDPOINT || `https://${PROJECT_REF}.storage.supabase.co/storage/v1/s3`,
+  region: process.env.VITE_AWS_S3_REGION || "ap-south-1",
+  accessKeyId: process.env.VITE_AWS_S3_ACCESS_KEY_ID || "2160ce870540fd08f2eb07263230d1c3",
+  secretAccessKey: process.env.VITE_AWS_S3_SECRET_ACCESS_KEY || "3a8741980dd7fe3ba6b6cd3c8924484a9b665b547958680a10d835b9d0724ed4",
+  bucket: process.env.VITE_AWS_S3_BUCKET || "wangyiyun",
+  functionUrl: process.env.VITE_SUPABASE_AUTH_URL || `https://${PROJECT_REF}.functions.supabase.co/unlock-storage-token`
 };
 
 const createS3Client = () => {

@@ -1,0 +1,41 @@
+/* 基础重置和全局样式 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: auto; /* 移除 overflow-hidden 避免内容被隐藏 */
+}
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background-color: #0a0a0c;
+  color: #e0e0e0;
+  overflow: auto; /* 允许滚动 */
+}
+
+#root {
+  height: 100%;
+  min-height: 100vh;
+  overflow: auto;
+}
+
+/* 移除 body 上的 select-none 以允许选择文本 */
+.select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 确保 App 组件能正确填充空间 */
+.app {
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}

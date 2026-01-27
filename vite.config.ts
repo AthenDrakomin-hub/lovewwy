@@ -1,9 +1,15 @@
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   define: {
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
     'process.env.SUPABASE_S3_ENDPOINT': JSON.stringify(process.env.SUPABASE_S3_ENDPOINT),
