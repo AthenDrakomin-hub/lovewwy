@@ -17,35 +17,35 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  const loadFiles = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const allFiles = await MediaService.listFiles();
-      
-      // 应用搜索和过滤
-      let filteredFiles = allFiles;
-      if (searchTerm) {
-        filteredFiles = filteredFiles.filter(file => 
-          file.fileName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-      if (fileTypeFilter && fileTypeFilter !== 'all') {
-        filteredFiles = filteredFiles.filter(file => file.type === fileTypeFilter);
-      }
-      
-      setFiles(filteredFiles);
-    } catch (err) {
-      console.error('Load files error:', err);
-      setError('加载文件列表失败: ' + (err instanceof Error ? err.message : '未知错误'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadFiles = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const allFiles = await MediaService.listFiles();
+        
+        // 应用搜索和过滤
+        let filteredFiles = allFiles;
+        if (searchTerm) {
+          filteredFiles = filteredFiles.filter(file => 
+            file.fileName.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+        if (fileTypeFilter && fileTypeFilter !== 'all') {
+          filteredFiles = filteredFiles.filter(file => file.type === fileTypeFilter);
+        }
+        
+        setFiles(filteredFiles);
+      } catch (err) {
+        console.error('Load files error:', err);
+        setError('加载文件列表失败: ' + (err instanceof Error ? err.message : '未知错误'));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
     loadFiles();
-  }, [searchTerm, fileTypeFilter, loadFiles]);
+  }, [searchTerm, fileTypeFilter]);
 
   const handleDelete = async (key: string) => {
     try {

@@ -185,16 +185,19 @@ class MultipartUploadService {
       for (let partNumber = 1; partNumber <= numParts; partNumber++) {
         const start = (partNumber - 1) * PART_SIZE;
         const end = Math.min(partNumber * PART_SIZE, fileSize);
-
+        
+        // 闭包捕获当前的 partNumber 值
+        const currentPartNumber = partNumber;
+        
         // 创建一个 promise，该 promise 在分片上传完成后更新进度
-        const partPromise = this.uploadPart(uploadId, partNumber, file, start, end)
+        const partPromise = this.uploadPart(uploadId, currentPartNumber, file, start, end)
           .then((etag) => {
             completedParts++;
             updateProgress();
             return etag;
           })
           .catch((error) => {
-            console.error(`Error uploading part ${partNumber}:`, error);
+            console.error(`Error uploading part ${currentPartNumber}:`, error);
             throw error;
           });
 

@@ -19,23 +19,23 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadPreview = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // 获取预签名 URL 用于安全预览
-      const url = await MediaService.getPresignedUrl(file.key);
-      setPreviewUrl(url);
-    } catch (err) {
-      console.error('Load preview error:', err);
-      setError('无法加载预览: ' + (err instanceof Error ? err.message : '未知错误'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadPreview = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // 获取预签名 URL 用于安全预览
+        const url = await MediaService.getPresignedUrl(file.key);
+        setPreviewUrl(url);
+      } catch (err) {
+        console.error('Load preview error:', err);
+        setError('无法加载预览: ' + (err instanceof Error ? err.message : '未知错误'));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
     if (isOpen) {
       loadPreview();
     } else {
@@ -43,7 +43,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
       setLoading(true);
       setError(null);
     }
-  }, [isOpen, file, loadPreview]);
+  }, [isOpen, file]);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
