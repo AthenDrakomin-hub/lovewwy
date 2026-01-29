@@ -6,6 +6,7 @@ const DB_VERSION = 1;
 const OBJECT_STORE_NAME = 'mediaCache';
 
 interface CacheEntry {
+  key: string;  // 添加 key 属性
   data: any;
   timestamp: number;
   expiry: number; // Unix timestamp in milliseconds
