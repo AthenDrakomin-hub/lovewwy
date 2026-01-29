@@ -170,7 +170,15 @@ class MultipartUploadService {
     try {
       const fileSize = file.size;
       const numParts = Math.ceil(fileSize / PART_SIZE);
-      let uploadedParts = 0;
+      let completedParts = 0;
+
+      // 创建一个共享的进度更新函数
+      const updateProgress = () => {
+        if (onProgress) {
+          const progress = Math.round((completedParts / numParts) * 100);
+          onProgress(progress);
+        }
+      };
 
       // 上传所有分片
       const uploadPromises = [];
@@ -178,15 +186,19 @@ class MultipartUploadService {
         const start = (partNumber - 1) * PART_SIZE;
         const end = Math.min(partNumber * PART_SIZE, fileSize);
 
-        uploadPromises.push(
-          this.uploadPart(uploadId, partNumber, file, start, end)
-            .then(() => {
-              uploadedParts++;
-              if (onProgress) {
-                onProgress(Math.round((uploadedParts / numParts) * 100));
-              }
-            })
-        );
+        // 创建一个 promise，该 promise 在分片上传完成后更新进度
+        const partPromise = this.uploadPart(uploadId, partNumber, file, start, end)
+          .then((etag) => {
+            completedParts++;
+            updateProgress();
+            return etag;
+          })
+          .catch((error) => {
+            console.error(`Error uploading part ${partNumber}:`, error);
+            throw error;
+          });
+
+        uploadPromises.push(partPromise);
       }
 
       // 等待所有分片上传完成
@@ -225,4 +237,5 @@ class MultipartUploadService {
   }
 }
 
-export default new MultipartUploadService();
+const multipartUploadService = new MultipartUploadService();
+export default multipartUploadService;

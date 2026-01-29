@@ -17,10 +17,6 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    loadFiles();
-  }, [searchTerm, fileTypeFilter]);
-
   const loadFiles = async () => {
     try {
       setLoading(true);
@@ -46,6 +42,10 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadFiles();
+  }, [searchTerm, fileTypeFilter, loadFiles]);
 
   const handleDelete = async (key: string) => {
     try {

@@ -27,9 +27,9 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     
     // 验证文件类型
     if (!allowedTypes.some(type => 
-      type === 'image/*' && file.type.startsWith('image/') ||
-      type === 'video/*' && file.type.startsWith('video/') ||
-      type === 'audio/*' && file.type.startsWith('audio/') ||
+      (type === 'image/*' && file.type.startsWith('image/')) ||
+      (type === 'video/*' && file.type.startsWith('video/')) ||
+      (type === 'audio/*' && file.type.startsWith('audio/')) ||
       file.type === type ||
       file.name.toLowerCase().endsWith(type.replace('.', ''))
     )) {

@@ -19,16 +19,6 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadPreview();
-    } else {
-      setPreviewUrl(null);
-      setLoading(true);
-      setError(null);
-    }
-  }, [isOpen, file]);
-
   const loadPreview = async () => {
     try {
       setLoading(true);
@@ -44,6 +34,16 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      loadPreview();
+    } else {
+      setPreviewUrl(null);
+      setLoading(true);
+      setError(null);
+    }
+  }, [isOpen, file, loadPreview]);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';

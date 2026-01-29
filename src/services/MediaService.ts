@@ -180,4 +180,5 @@ class MediaService {
   }
 }
 
-export default new MediaService();
+const mediaService = new MediaService();
+export default mediaService;
