@@ -7,6 +7,8 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3Client } from '../utils/s3Client';
+import CacheService from './CacheService';
+import MultipartUploadService from './MultipartUploadService';
 
 const BUCKET_NAME = process.env.REACT_APP_SUPABASE_S3_BUCKET || 'media';
 
@@ -23,23 +25,33 @@ class MediaService {
   /**
    * 上传文件到 S3
    */
-  async uploadFile(file: File, key?: string): Promise<string> {
+  async uploadFile(file: File, key?: string, onProgress?: (progress: number) => void): Promise<string> {
     try {
       const fileKey = key || `${Date.now()}-${file.name}`;
-      
-      const putCommand = new PutObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: fileKey,
-        Body: file,
-        ContentType: file.type,
-        Metadata: {
-          originalName: file.name,
-          uploadTime: new Date().toISOString(),
-        }
-      });
 
-      await s3Client.send(putCommand);
-      return fileKey;
+      // 检查是否需要分片上传（文件大于 5MB）
+      if (MultipartUploadService.needsMultipartUpload(file)) {
+        console.log(`Starting multipart upload for ${file.name} (${file.size} bytes)`);
+        // 使用分片上传
+        return await MultipartUploadService.uploadLargeFile(file, fileKey, onProgress);
+      } else {
+        // 使用普通上传
+        const putCommand = new PutObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: fileKey,
+          Body: file,
+          ContentType: file.type,
+          Metadata: {
+            originalName: file.name,
+            uploadTime: new Date().toISOString(),
+          }
+        });
+
+        await s3Client.send(putCommand);
+        // 清除缓存，因为文件列表已更改
+        await CacheService.clear();
+        return fileKey;
+      }
     } catch (error) {
       console.error('Upload error:', error);
       throw error;
@@ -51,6 +63,13 @@ class MediaService {
    */
   async listFiles(prefix: string = ''): Promise<MediaFile[]> {
     try {
+      // 首先尝试从缓存获取
+      const cachedFiles = await CacheService.getCachedMediaList(prefix);
+      if (cachedFiles) {
+        console.log('Returning cached media list');
+        return cachedFiles;
+      }
+
       const listCommand = new ListObjectsV2Command({
         Bucket: BUCKET_NAME,
         Prefix: prefix,
@@ -70,6 +89,9 @@ class MediaService {
         lastModified: obj.LastModified,
       }));
 
+      // 将结果存入缓存
+      await CacheService.setCachedMediaList(files, prefix);
+
       return files;
     } catch (error) {
       console.error('List files error:', error);
@@ -88,6 +110,8 @@ class MediaService {
       });
 
       await s3Client.send(deleteCommand);
+      // 清除缓存，因为文件列表已更改
+      await CacheService.clear();
     } catch (error) {
       console.error('Delete error:', error);
       throw error;

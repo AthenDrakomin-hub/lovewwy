@@ -45,24 +45,11 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     setSuccess(null);
 
     try {
-      // 模拟上传进度
-      const interval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(interval);
-            return prev;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
-      // 上传文件
-      const key = await MediaService.uploadFile(file);
+      // 上传文件，传递进度回调
+      const key = await MediaService.uploadFile(file, undefined, (progress) => {
+        setUploadProgress(progress);
+      });
       
-      // 清除进度模拟
-      clearInterval(interval);
-      setUploadProgress(100);
-
       // 获取文件信息
       const fileInfo = await MediaService.getFileInfo(key);
       

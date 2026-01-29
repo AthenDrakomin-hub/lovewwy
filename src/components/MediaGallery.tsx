@@ -19,7 +19,7 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
 
   useEffect(() => {
     loadFiles();
-  }, []);
+  }, [searchTerm, fileTypeFilter]);
 
   const loadFiles = async () => {
     try {
@@ -107,7 +107,7 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  if (loading) {
+  if (loading && files.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
