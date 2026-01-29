@@ -1,40 +1,101 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Supabase S3 媒体管理器
 
-# 新闻聚合与音乐播放系统
+这是一个基于 React 和 Tailwind CSS 构建的生产级媒体管理系统，专门针对 Supabase Storage 的 S3 兼容模式进行了深度优化和定制。
 
-这是一个使用 React 19、Vite 6 和 TypeScript 5.6 构建的仪表盘级新闻聚合与音乐播放系统。系统采用深色主题设计，主色调为科技蓝(#00f2ff)，集成了新闻API和音乐API，提供实时新闻浏览和音乐播放功能。
+## 🔧 环境配置详细指南
 
-## 功能特性
+### 1. 项目依赖安装
+在您的本地 React 项目根目录中，执行以下命令安装必要的 AWS SDK 依赖：
+```bash
+npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+npm install wavesurfer.js
+```
 
-- 新闻浏览：支持分类浏览、搜索和收藏
-- 音乐播放：音乐搜索和播放功能
-- API监控：实时监控API使用情况
-- 响应式设计：适配不同屏幕尺寸
-- 统一组件体系：包含公共基础组件和业务组件
-- 深色主题：科技感十足的深色界面设计
-- 存储服务：通过Supabase Edge Functions进行安全的S3存储操作
+### 2. Supabase 平台配置步骤
+- 登录 Supabase Dashboard 并导航至 Storage 管理页面
+- 创建一个名为 "media" 的新存储桶（Bucket），用于存放所有媒体文件
+- 进入 Settings -> API 页面，记录下您的 Project Ref（项目引用ID）和 Service Role Key（服务角色密钥）
+- CORS 安全配置（至关重要）：在 Storage 设置的安全策略中，添加允许的域名（例如：http://localhost:3000 或生产环境域名），并确保允许以下 HTTP 方法：GET、PUT、POST、DELETE
 
-## 运行本地开发
+### 3. S3 兼容性凭据获取
+Supabase 提供的 S3 兼容端点信息如下：
+- Endpoint（端点地址）：https://[your-project-id].supabase.co/storage/v1/s3
+- Region（区域）：对应您 Supabase 实例所在的地理区域（例如：ap-southeast-1、us-east-1 等）
+- Access Key（访问密钥）：使用您的 Supabase 项目 ID
+- Secret Key（私有密钥）：使用您的 Supabase API 密钥（Service Role Key）
 
-**前置要求:** Node.js
+## 🚀 核心功能特性
 
-1. 安装依赖:
-   `npm install`
-2. 配置环境变量：在 [.env.local](.env.local) 中设置必要的API密钥和配置
-3. 运行应用:
-   `npm run dev`
+- **S3 SDK 结构兼容性**：所有代码逻辑严格按照 @aws-sdk/client-s3 最佳实践规范实现，确保与标准 S3 操作完全兼容
+- **智能媒体预览系统**：提供多种媒体类型的差异化预览功能，包括音频播放器（集成波形可视化模拟）、视频播放预览以及文档类型的基础预览
+- **预签名 URL 管理**：完整实现了安全临时访问链接的生成、管理和验证机制，确保媒体文件的安全访问控制
+- **响应式用户界面**：采用 Tailwind CSS 构建完全自适应的响应式设计，完美支持移动设备、平板和桌面端的各种屏幕尺寸
+- **高级音频播放器**：集成了 WaveSurfer.js 波形可视化功能，提供专业的音频播放体验
+- **全局通知系统**：统一的错误处理和用户反馈机制
 
-## 环境配置
+## 📁 项目结构
 
-确保在环境文件中正确配置以下变量：
-- `VITE_NEWS_API_KEY` - NewsAPI密钥
-- `VITE_SUPABASE_AUTH_URL` - Supabase Edge Functions URL
-- `VITE_AWS_S3_*` - AWS S3兼容存储配置
-- `GEMINI_API_KEY` - Gemini API密钥
+```
+src/
+├── components/                 # React 组件
+│   ├── MediaUploader.tsx       # 媒体上传组件
+│   ├── MediaGallery.tsx        # 媒体库展示组件
+│   ├── MediaPreviewModal.tsx   # 媒体预览模态框
+│   ├── PresignedUrlManager.tsx # 预签名 URL 管理
+│   ├── AdvancedAudioPlayer.tsx # 高级音频播放器
+│   └── ...                     # 其他 UI 组件
+├── services/                   # 业务逻辑服务
+│   └── MediaService.ts         # 媒体服务核心逻辑
+├── utils/                      # 工具函数
+│   └── s3Client.ts             # S3 客户端配置
+├── contexts/                   # React 上下文
+│   └── NotificationContext.tsx # 通知上下文
+└── App.tsx                     # 主应用组件
+```
 
-## Supabase Edge Functions 配置
+## ⚙️ 环境变量配置
 
-当前配置的Edge Functions URL为：
-`VITE_SUPABASE_AUTH_URL=https://zlbemopcgjohrnyyiwvs.functions.supabase.co/unlock-storage-token`
+创建 `.env` 文件并配置以下变量：
+
+```env
+# Supabase S3 配置
+REACT_APP_SUPABASE_S3_ENDPOINT=https://your-project-id.supabase.co/storage/v1/s3
+REACT_APP_SUPABASE_S3_REGION=ap-southeast-1
+REACT_APP_SUPABASE_S3_ACCESS_KEY_ID=your-project-id
+REACT_APP_SUPABASE_S3_SECRET_ACCESS_KEY=your-service-role-key
+REACT_APP_SUPABASE_S3_BUCKET=media
+
+# 其他配置
+REACT_APP_DEBUG=true
+```
+
+## 🛠️ 开发启动
+
+```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm start
+
+# 构建生产版本
+npm run build
+```
+
+## 📋 功能清单
+
+- [x] S3 兼容客户端配置
+- [x] 媒体上传功能
+- [x] 媒体列表展示
+- [x] 媒体预览功能
+- [x] 预签名 URL 生成
+- [x] 音频波形可视化
+- [x] 响应式 UI 设计
+- [x] 全局通知系统
+- [x] 错误处理机制
+- [x] 文件类型验证
+- [x] 搜索和筛选功能
+
+## 📝 许可证
+
+MIT License
