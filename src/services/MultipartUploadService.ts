@@ -180,32 +180,39 @@ class MultipartUploadService {
         }
       };
 
-      // 上传所有分片
+      // 使用 Promise.allSettled 来更好地处理并发上传
       const uploadPromises = [];
+      
+      // 预先创建所有分片的上传任务
       for (let partNumber = 1; partNumber <= numParts; partNumber++) {
         const start = (partNumber - 1) * PART_SIZE;
         const end = Math.min(partNumber * PART_SIZE, fileSize);
-        
-        // 闭包捕获当前的 partNumber 值
         const currentPartNumber = partNumber;
-        
-        // 创建一个 promise，该 promise 在分片上传完成后更新进度
-        const partPromise = this.uploadPart(uploadId, currentPartNumber, file, start, end)
-          .then((etag) => {
+
+        // 创建分片上传任务
+        const uploadTask = async () => {
+          try {
+            const etag = await this.uploadPart(uploadId, currentPartNumber, file, start, end);
             completedParts++;
             updateProgress();
-            return etag;
-          })
-          .catch((error) => {
+            return { partNumber: currentPartNumber, etag };
+          } catch (error) {
             console.error(`Error uploading part ${currentPartNumber}:`, error);
             throw error;
-          });
+          }
+        };
 
-        uploadPromises.push(partPromise);
+        uploadPromises.push(uploadTask());
       }
 
       // 等待所有分片上传完成
-      await Promise.all(uploadPromises);
+      const results = await Promise.allSettled(uploadPromises);
+      
+      // 检查是否有任何分片上传失败
+      const failedParts = results.filter(result => result.status === 'rejected');
+      if (failedParts.length > 0) {
+        throw new Error(`Failed to upload ${failedParts.length} parts`);
+      }
 
       // 完成分片上传
       await this.completeMultipartUpload(uploadId);
