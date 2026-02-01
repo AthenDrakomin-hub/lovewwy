@@ -2,11 +2,9 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# WYY AURA Personal Media Hub
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/drive/1dTjvxH1pIdHIV3JEezO_CsfhLnXrUjUa
+A personal media hub featuring music, videos, and premium content.
 
 ## Run Locally
 
@@ -15,6 +13,6 @@ View your app in AI Studio: https://ai.studio/apps/drive/1dTjvxH1pIdHIV3JEezO_Cs
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Create a `.env.local` file and add your environment variables (see `.env.example`)
 3. Run the app:
    `npm run dev`

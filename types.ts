@@ -21,20 +21,9 @@ export interface LinkItem {
   category: string;
 }
 
-export interface MoodRecommendation {
-  vibe: string;
-  suggestion: string;
-  pairing: {
-    music: string;
-    visual: string;
-  };
-}
 
-export interface LoveLetterConfig {
-  tone: 'romantic' | 'poetic' | 'funny' | 'short';
-  occasion: string;
-  recipientName: string;
-}
+
+
 
 export interface Milestone {
   id: string;
