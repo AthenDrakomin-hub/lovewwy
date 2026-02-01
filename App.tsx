@@ -74,7 +74,7 @@ const App: React.FC = () => {
         <div className="flex items-center gap-6">
            <LanguageSwitcher currentLang={lang} onLangChange={handleLangChange} />
            <Link to="/admin">
-             <button className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:border-indigo-500 transition-all shadow-xl active:scale-90 group">
+             <button title="Admin" aria-label="Admin" className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:border-indigo-500 transition-all shadow-xl active:scale-90 group">
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-zinc-500 group-hover:text-white" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
              </button>
            </Link>

@@ -12,8 +12,10 @@ const AdminPage: React.FC<AdminPageProps> = () => {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showS3Admin, setShowS3Admin] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
 
   const handleAdminLogin = (password: string) => {
+    setAdminPassword(password);
     setIsAdminLoggedIn(true);
     setShowLogin(false);
     setShowDashboard(true);
@@ -63,7 +65,7 @@ const AdminPage: React.FC<AdminPageProps> = () => {
                 onUpdateLinks={() => {}} 
               />
             )}
-            {showS3Admin && <S3Admin />}
+            {showS3Admin && <S3Admin adminPassword={adminPassword} />}
           </div>
         </div>
       ) : (
