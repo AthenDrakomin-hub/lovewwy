@@ -33,6 +33,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose }) => {
       <button 
         onClick={onClose}
         className="absolute top-6 right-6 z-[110] w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10"
+        aria-label="Close video"
       >
         <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M6 18L18 6M6 6l12 12" />

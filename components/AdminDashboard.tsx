@@ -58,7 +58,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, treasureLinks,
               <span>ADD ENTRY</span>
             </button>
           )}
-          <button onClick={onClose} className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center hover:bg-white hover:text-black transition-all">
+          <button onClick={onClose} className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center hover:bg-white hover:text-black transition-all" aria-label="Close panel">
             <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
@@ -140,7 +140,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, treasureLinks,
               <div className="grid grid-cols-1 gap-4">
                 {(activeTab === 'videos' ? items.videos : items.music).map(item => (
                   <div key={item.id} className="glass p-6 rounded-[32px] border border-zinc-900 flex items-center gap-8 group hover:border-indigo-500/20">
-                    <img src={item.thumbnail} className="w-20 h-20 object-cover rounded-2xl shadow-xl" />
+                    <img 
+                      src={item.thumbnail} 
+                      className="w-20 h-20 object-cover rounded-2xl shadow-xl" 
+                      alt={item.type === 'video' ? `Thumbnail for video "${item.title}" by ${item.artist}` : `Album art for "${item.title}" by ${item.artist}`}
+                    />
                     <div className="flex-1 min-w-0">
                       <h3 className="text-xl font-bold text-white truncate">{item.title}</h3>
                       <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest opacity-60">{item.artist}</p>
@@ -163,31 +167,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, treasureLinks,
               {activeTab === 'treasure' ? (
                 <>
                   <div className="space-y-2 col-span-2">
-                    <label className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Icon / Emoji</label>
-                    <input type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.icon} onChange={e => setNewItem({...newItem, icon: e.target.value})} />
+                    <label htmlFor="icon-input" className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Icon / Emoji</label>
+                    <input id="icon-input" type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.icon} onChange={e => setNewItem({...newItem, icon: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Title</label>
-                    <input type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.title} onChange={e => setNewItem({...newItem, title: e.target.value})} />
+                    <label htmlFor="title-input" className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Title</label>
+                    <input id="title-input" type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.title} onChange={e => setNewItem({...newItem, title: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Category</label>
-                    <input type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} />
+                    <label htmlFor="category-input" className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Category</label>
+                    <input id="category-input" type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} />
                   </div>
                   <div className="space-y-2 col-span-2">
-                    <label className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">URL</label>
-                    <input type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.url} onChange={e => setNewItem({...newItem, url: e.target.value})} />
+                    <label htmlFor="url-input" className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">URL</label>
+                    <input id="url-input" type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.url} onChange={e => setNewItem({...newItem, url: e.target.value})} />
                   </div>
                   <div className="space-y-2 col-span-2">
-                    <label className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Description</label>
-                    <textarea className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm h-32" value={newItem.description} onChange={e => setNewItem({...newItem, description: e.target.value})} />
+                    <label htmlFor="description-textarea" className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Description</label>
+                    <textarea id="description-textarea" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm h-32" value={newItem.description} onChange={e => setNewItem({...newItem, description: e.target.value})} />
                   </div>
                 </>
               ) : (
                 <>
                   <div className="space-y-2 col-span-2">
-                    <label className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Content Title</label>
-                    <input type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.title} onChange={e => setNewItem({...newItem, title: e.target.value})} />
+                    <label htmlFor="content-title-input" className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">Content Title</label>
+                    <input id="content-title-input" type="text" className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm" value={newItem.title} onChange={e => setNewItem({...newItem, title: e.target.value})} />
                   </div>
                 </>
               )}
