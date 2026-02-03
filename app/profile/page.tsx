@@ -1,5 +1,7 @@
+'use client'
 import React, { useEffect, useState } from 'react';
-import SharedNavbar from '../components/SharedNavbar';
+import SharedNavbar from '../../components/SharedNavbar';
+import { getAccessToken } from '../../src/lib/supabaseClient';
 
 const ProfilePage: React.FC = () => {
   const [subscription, setSubscription] = useState<any | null>(null);
@@ -8,7 +10,6 @@ const ProfilePage: React.FC = () => {
     let mounted = true;
     (async () => {
       try {
-        const { getAccessToken } = await import('../src/lib/supabaseClient');
         const token = await getAccessToken();
         const headers: Record<string,string> = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
