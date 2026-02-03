@@ -147,7 +147,7 @@ const TreasureBox: React.FC<TreasureBoxProps> = ({ translations, isSubscribed, o
               </div>
 
               {/* Icon & Title */}
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-500 origin-left drop-shadow-2xl">
+              <div className="text-5xl mb-6 min-w-[56px] min-h-[56px] flex items-center justify-center group-hover:scale-110 transition-transform duration-500 origin-left drop-shadow-2xl">
                 {link.icon}
               </div>
               

@@ -88,7 +88,7 @@ const TreasurePortal: React.FC<TreasurePortalProps> = ({ translations, links, on
               >
                 <div className="h-full bg-zinc-900/40 backdrop-blur-md p-10 rounded-[48px] border border-white/5 hover:border-amber-500/40 transition-all duration-700 flex flex-col hover:-translate-y-4 hover:shadow-[0_40px_80px_rgba(0,0,0,0.8)]">
                   <div className="mb-8 flex items-center justify-between">
-                    <div className="text-6xl group-hover:scale-125 transition-transform duration-700 origin-left drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                    <div className="text-6xl min-w-[64px] min-h-[64px] flex items-center justify-center group-hover:scale-125 transition-transform duration-700 origin-left drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                       {link.icon}
                     </div>
                     <div className="flex flex-col items-end">

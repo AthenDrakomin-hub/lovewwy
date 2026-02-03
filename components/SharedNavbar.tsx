@@ -90,7 +90,7 @@ const SharedNavbar: React.FC<SharedNavbarProps> = ({
           className={`transition-all hover:scale-110 flex items-center gap-2 ${pathname === '/treasure' ? (isSubscribed ? 'text-amber-500' : 'text-white') : (isSubscribed ? 'text-amber-500' : 'text-zinc-500 hover:text-amber-400')}`}
         >
           {t.nav.treasure}
-          {!isSubscribed && <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-zinc-700" fill="currentColor"><path d="M12 17a2 2 0 0 0 2-2 2 2 0 0 0-2-2 2 2 0 0 0-2 2 2 2 0 0 0 2 2zm6-9h-1V6a5 5 0 0 0-10 0v2H6a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-7a3 3 0 0 0-3-3zM9 6a3 3 0 0 1 6 0v2H9V6z"/></svg>}
+          {!isSubscribed && <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 min-w-[14px] min-h-[14px] text-zinc-700" fill="currentColor"><path d="M12 17a2 2 0 0 0 2-2 2 2 0 0 0-2-2 2 2 0 0 0-2 2 2 2 0 0 0 2 2zm6-9h-1V6a5 5 0 0 0-10 0v2H6a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-7a3 3 0 0 0-3-3zM9 6a3 3 0 0 1 6 0v2H9V6z"/></svg>}
         </Link>
         <Link href="/profile" className="ml-6 text-zinc-500 hover:text-white">Profile</Link>
       </div>

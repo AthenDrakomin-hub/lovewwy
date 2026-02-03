@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet" 
         />
       </head>
-      <body className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-indigo-500/30">
+      <body className="min-h-screen pt-24 bg-[#09090b] text-zinc-100 selection:bg-indigo-500/30">
         {/* 注意：如果你在每个 page.tsx 里都写了 <SharedNavbar />，
           那么这里的 <SharedNavbar /> 应该移除，否则页面上会出现两个导航栏。
           建议统一写在这里，然后删掉所有 page.tsx 里的 <SharedNavbar />。
