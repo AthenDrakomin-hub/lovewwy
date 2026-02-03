@@ -6,7 +6,11 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'WYY AURA',
   description: 'WYY AURA - Personal Creative Space',
-  viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
