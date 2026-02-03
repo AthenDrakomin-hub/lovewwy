@@ -4,12 +4,18 @@ import TreasureBox from '../../components/TreasureBox';
 import SharedNavbar from '../../components/SharedNavbar';
 import { TRANSLATIONS, Language } from '../../constants/translations';
 
-interface TreasureBoxPageProps {
-  lang?: Language;
+// 1. 适配 App Router 的标准 Props 类型
+interface PageProps {
+  params: { [key: string]: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-const TreasureBoxPage: React.FC<TreasureBoxPageProps> = ({ lang = 'zh' }) => {
+// 2. 将组件改为 export default function 格式
+export default function TreasureBoxPage({ searchParams }: PageProps) {
+  // 3. 从查询参数获取语言，默认为 'zh'
+  const lang = (searchParams?.lang as Language) || 'zh';
   const t = TRANSLATIONS[lang];
+  
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [treasureLinks, setTreasureLinks] = useState([
     { id: 'l1', title: 'Framer Motion', url: 'https://framer.com/motion', icon: '🎨', description: 'Production-ready animations for React.', category: 'Creative' },
@@ -35,6 +41,4 @@ const TreasureBoxPage: React.FC<TreasureBoxPageProps> = ({ lang = 'zh' }) => {
       </div>
     </div>
   );
-};
-
-export default TreasureBoxPage;
+}

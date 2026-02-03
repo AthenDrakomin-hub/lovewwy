@@ -8,11 +8,14 @@ import { TRANSLATIONS, Language } from '../../constants/translations';
 import { MUSIC } from '../../constants';
 import { MediaItem } from '../../types';
 
-interface MusicPageProps {
-  lang?: Language;
+interface PageProps {
+  params: { [key: string]: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-const MusicPage: React.FC<MusicPageProps> = ({ lang = 'zh' }) => {
+export default function MusicPage({ searchParams }: PageProps) {
+  // 从查询参数获取语言，默认为 'zh'
+  const lang = (searchParams?.lang as Language) || 'zh';
   const [currentTrack, setCurrentTrack] = useState<MediaItem>(MUSIC[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const t = TRANSLATIONS[lang];
@@ -48,6 +51,4 @@ const MusicPage: React.FC<MusicPageProps> = ({ lang = 'zh' }) => {
       />
     </div>
   );
-};
-
-export default MusicPage;
+}

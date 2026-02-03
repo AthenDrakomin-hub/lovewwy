@@ -4,11 +4,18 @@ import AdminLoginModal from '../../components/AdminLoginModal';
 import AdminDashboard from '../../components/AdminDashboard';
 import S3Admin from '../../components/S3Admin';
 import SharedNavbar from '../../components/SharedNavbar';
+import { Language } from '../../constants/translations';
 
-interface AdminPageProps {}
+// 适配 App Router 的标准 Props 类型
+interface PageProps {
+  params: { [key: string]: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
-const AdminPage: React.FC<AdminPageProps> = () => {
-  const [showLogin, setShowLogin] = useState(true);
+export default function AdminPage({ searchParams }: PageProps) {
+  // 获取语言参数，默认为 'zh'
+  const lang = (searchParams?.lang as Language) || 'zh';
+
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showS3Admin, setShowS3Admin] = useState(false);
@@ -17,13 +24,14 @@ const AdminPage: React.FC<AdminPageProps> = () => {
   const handleAdminLogin = (password: string) => {
     setAdminPassword(password);
     setIsAdminLoggedIn(true);
-    setShowLogin(false);
     setShowDashboard(true);
   };
 
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-100">
-      <SharedNavbar />
+      {/* 将语言传递给 Navbar */}
+      <SharedNavbar lang={lang} />
+      
       {isAdminLoggedIn ? (
         <div className="pt-24">
           {/* Admin navigation */}
@@ -45,7 +53,6 @@ const AdminPage: React.FC<AdminPageProps> = () => {
             <button
               onClick={() => {
                 setIsAdminLoggedIn(false);
-                setShowLogin(true);
                 setShowDashboard(false);
                 setShowS3Admin(false);
               }}
@@ -62,7 +69,6 @@ const AdminPage: React.FC<AdminPageProps> = () => {
                 onClose={() => {
                   setShowDashboard(false);
                   setIsAdminLoggedIn(false);
-                  setShowLogin(true);
                 }} 
                 treasureLinks={[]} 
                 onUpdateLinks={() => {}} 
@@ -75,12 +81,10 @@ const AdminPage: React.FC<AdminPageProps> = () => {
         <div className="flex items-center justify-center min-h-[80vh]">
           <AdminLoginModal 
             onLogin={handleAdminLogin} 
-            onClose={() => setShowLogin(false)} 
+            onClose={() => {}} // 登录页通常不提供关闭，或根据需要跳转回首页
           />
         </div>
       )}
     </div>
   );
-};
-
-export default AdminPage;
+}
