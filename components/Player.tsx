@@ -21,6 +21,14 @@ const Player: React.FC<PlayerProps> = ({ currentTrack, isPlaying, onPlayPause, o
   const [playMode, setPlayMode] = useState<'repeat' | 'shuffle' | 'single'>('repeat');
   const [sleepTimeout, setSleepTimeout] = useState<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const progressRef = useRef<HTMLDivElement | null>(null);
+
+  // Update progress bar width on client only to avoid inline styles in server HTML
+  useEffect(() => {
+    if (!progressRef.current) return;
+    const pct = duration ? (currentTime / duration) * 100 : 0;
+    progressRef.current.style.setProperty('--progress', `${pct}%`);
+  }, [currentTime, duration]);
 
   // 监听播放状态改变
   useEffect(() => {
@@ -180,6 +188,8 @@ const Player: React.FC<PlayerProps> = ({ currentTrack, isPlaying, onPlayPause, o
           <button 
             onClick={playPrevious}
             className="text-zinc-400 hover:text-white transition-colors"
+            title="Previous track"
+            aria-label="Previous track"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
           </button>
@@ -187,6 +197,8 @@ const Player: React.FC<PlayerProps> = ({ currentTrack, isPlaying, onPlayPause, o
           <button 
             onClick={() => onPlayPause(!isPlaying)}
             className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg shadow-indigo-500/40"
+            title={isPlaying ? 'Pause' : 'Play'}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? (
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
@@ -198,6 +210,8 @@ const Player: React.FC<PlayerProps> = ({ currentTrack, isPlaying, onPlayPause, o
           <button 
             onClick={playNext}
             className="text-zinc-400 hover:text-white transition-colors"
+            title="Next track"
+            aria-label="Next track"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
           </button>
@@ -210,8 +224,8 @@ const Player: React.FC<PlayerProps> = ({ currentTrack, isPlaying, onPlayPause, o
             onClick={handleSeek}
           >
             <div 
-              className="absolute top-0 left-0 h-full bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.6)]"
-              style={{ width: `${(currentTime / duration) * 100}%` }}
+              ref={progressRef}
+              className="absolute top-0 left-0 h-full bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.6)] progress-fill"
             ></div>
           </div>
           <span className="text-[10px] text-zinc-500 font-mono w-10">{formatTime(duration)}</span>

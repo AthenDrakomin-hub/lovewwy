@@ -30,13 +30,13 @@ pages/AdminPage.tsx                # ✅ 已更新：保存密码状态并传入
 
 ```dotenv
 # Supabase 认证
-VITE_SUPABASE_AUTH_URL="https://zlbemopcgjohrnyyiwvs.supabase.co"
-VITE_SUPABASE_ANON_KEY="your-anon-key-here"
-VITE_SUPABASE_S3_BUCKET="wangyiyun"
+NEXT_PUBLIC_SUPABASE_AUTH_URL="https://zlbemopcgjohrnyyiwvs.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key-here"
+NEXT_PUBLIC_SUPABASE_S3_BUCKET="wangyiyun"
 
 # Edge Function 完整 URL
 # 格式: https://YOUR_PROJECT_REF.functions.supabase.co/s3-compat-storage
-VITE_FUNCTIONS_URL="https://zlbemopcgjohrnyyiwvs.functions.supabase.co/s3-compat-storage"
+NEXT_PUBLIC_FUNCTIONS_URL="https://zlbemopcgjohrnyyiwvs.functions.supabase.co/s3-compat-storage"
 ```
 
 ### 关键点

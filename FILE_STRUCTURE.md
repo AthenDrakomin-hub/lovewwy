@@ -36,13 +36,13 @@ lovewwy/
 ├── 📁 services/
 │
 ├── 📄 App.tsx
-├── 📄 index.tsx
-├── 📄 index.html
+├── 📄 index.tsx (legacy - inert)
 ├── 📄 types.ts
 ├── 📄 constants.ts
 ├── 📄 tsconfig.json
-├── 📄 vite.config.ts
 ├── 📄 package.json
+
+Note: This project has been migrated from a Vite-based setup to Next.js (see `app/` directory). Files like `index.html` and `vite.config.ts` are intentionally removed or marked for historical reference.
 ├── 📄 README.md
 ├── 📄 metadata.json
 │
@@ -152,7 +152,7 @@ export const getAccessToken = async () => { ... };
 # 原有配置...
 
 # ✨ 新增配置
-VITE_FUNCTIONS_URL="https://zlbemopcgjohrnyyiwvs.functions.supabase.co/s3-compat-storage"
+NEXT_PUBLIC_FUNCTIONS_URL="https://zlbemopcgjohrnyyiwvs.functions.supabase.co/s3-compat-storage"
 ```
 
 **说明**：
@@ -166,7 +166,7 @@ VITE_FUNCTIONS_URL="https://zlbemopcgjohrnyyiwvs.functions.supabase.co/s3-compat
 # 原有配置...
 
 # ✨ 新增配置说明
-# VITE_FUNCTIONS_URL: Edge Function 完整 URL
+# NEXT_PUBLIC_FUNCTIONS_URL: Edge Function 完整 URL
 # 格式: https://YOUR_PROJECT_REF.functions.supabase.co/s3-compat-storage
 VITE_FUNCTIONS_URL="https://your-project-ref.functions.supabase.co/s3-compat-storage"
 ```
@@ -346,10 +346,10 @@ src/lib/supabaseClient.ts
 
 ```
 .env.local
-├─ VITE_SUPABASE_AUTH_URL ← supabaseClient.ts
-├─ VITE_SUPABASE_ANON_KEY ← supabaseClient.ts
-├─ VITE_FUNCTIONS_URL ← S3Admin.tsx
-└─ VITE_SUPABASE_S3_BUCKET ← S3Admin.tsx
+├─ NEXT_PUBLIC_SUPABASE_AUTH_URL ← supabaseClient.ts
+├─ NEXT_PUBLIC_SUPABASE_ANON_KEY ← supabaseClient.ts
+├─ NEXT_PUBLIC_FUNCTIONS_URL ← S3Admin.tsx
+└─ NEXT_PUBLIC_SUPABASE_S3_BUCKET ← S3Admin.tsx
 
 Edge Function 环境变量
 └─ ADMIN_PASSWORD ← x-admin-password header 验证

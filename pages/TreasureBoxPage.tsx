@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import TreasureBox from '../components/TreasureBox';
 import SharedNavbar from '../components/SharedNavbar';
 import { TRANSLATIONS, Language } from '../constants/translations';

@@ -1,5 +1,7 @@
+'use client'
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import Hero from './components/Hero';
 import LanguageSwitcher from './components/LanguageSwitcher';
 
@@ -8,26 +10,25 @@ import { TRANSLATIONS, Language } from './constants/translations';
 const App: React.FC = () => {
   // 语言状态
   const [lang, setLang] = useState<Language>('zh');
-  const navigate = useNavigate();
   const t = TRANSLATIONS[lang];
+  const router = useRouter();
+  const pathname = usePathname() || '/';
 
   // 导航功能
   const goBack = () => {
-    navigate(-1);
+    router.back();
   };
 
   const goForward = () => {
-    navigate(1);
+    router.forward();
   };
 
   const goToHome = () => {
-    navigate('/');
+    router.push('/');
   };
 
   // 状态管理
   const [isSubscribed, setIsSubscribed] = useState(false);
-  // 获取当前路径
-  const location = useLocation();
 
   // 初始化加载
   useEffect(() => {
@@ -53,7 +54,7 @@ const App: React.FC = () => {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 h-24 px-12 flex items-center justify-between glass border-b border-white/5">
         <div className="flex items-center gap-4 group cursor-pointer">
-          <Link to="/" className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 via-purple-600 to-amber-500 rounded-2xl aura-glow transition-all duration-500 group-hover:rotate-[15deg] group-hover:scale-110"></div>
             <div className="hidden sm:block">
               <div className="flex items-center gap-2">
@@ -66,16 +67,16 @@ const App: React.FC = () => {
         </div>
         
         <div className="hidden md:flex gap-10 text-[11px] font-black tracking-[0.3em] uppercase">
-          <Link to="/music" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.home}</Link>
-          <Link to="/videos" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.visuals}</Link>
-          <Link to="/treasure" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.treasure}</Link>
+          <Link href="/music" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.home}</Link>
+          <Link href="/videos" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.visuals}</Link>
+          <Link href="/treasure" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.treasure}</Link>
         </div>
         
         <div className="flex items-center gap-6">
            <LanguageSwitcher currentLang={lang} onLangChange={handleLangChange} />
-           <Link to="/admin">
+           <Link href="/admin">
              <button title="Admin" aria-label="Admin" className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:border-indigo-500 transition-all shadow-xl active:scale-90 group">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-zinc-500 group-hover:text-white" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-zinc-500 group-hover:text-white" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
              </button>
            </Link>
         </div>
@@ -83,7 +84,7 @@ const App: React.FC = () => {
 
       <main className="animate-fadeIn pt-24">
         {/* 根据当前路径显示相应内容 */}
-        {location.pathname === '/' && (
+        {pathname === '/' && (
           <>
             <section className="min-h-screen flex items-center justify-center px-8">
               <div className="text-center max-w-4xl">
@@ -94,10 +95,10 @@ const App: React.FC = () => {
                   Personal Media Hub & Digital Experience Platform
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <Link to="/music" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full transition-all">
+                  <Link href="/music" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full transition-all">
                     进入音乐世界
                   </Link>
-                  <Link to="/videos" className="px-8 py-3 border border-zinc-700 hover:border-indigo-500 text-white font-bold rounded-full transition-all">
+                  <Link href="/videos" className="px-8 py-3 border border-zinc-700 hover:border-indigo-500 text-white font-bold rounded-full transition-all">
                     探索视觉
                   </Link>
                 </div>

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { LinkItem } from '../types';
+import SubscribeButton from './SubscribeButton';
 
 interface TreasureBoxProps {
   translations: any;
@@ -82,12 +83,11 @@ const TreasureBox: React.FC<TreasureBoxProps> = ({ translations, isSubscribed, o
                   ))}
                </div>
 
-               <button 
-                onClick={onSubscribe}
-                className="w-full py-6 bg-white text-black font-black rounded-[28px] hover:bg-amber-500 hover:text-white transition-all transform hover:-translate-y-1 active:scale-[0.98] shadow-2xl shadow-white/10 text-base"
-               >
-                 {translations.unlockBtn}
-               </button>
+               {/* Subscribe Button - integrated with payment API */}
+               <SubscribeButton onSuccess={onSubscribe} amount="9.9" translations={translations} />
+               
+               {/* Fallback small note */}
+               <p className="text-center text-[10px] text-zinc-600 mt-8 font-bold tracking-widest uppercase opacity-60">Verified Payment • No Hidden Costs</p>
                
                <p className="text-center text-[10px] text-zinc-600 mt-8 font-bold tracking-widest uppercase opacity-60">Verified Payment • No Hidden Costs</p>
             </div>

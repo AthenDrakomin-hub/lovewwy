@@ -5,7 +5,7 @@
  * VITE_S3_PUBLIC_BASE_URL = https://your-cdn-or-s3-public-url.com
  */
 
-const PUBLIC_BASE_URL = import.meta.env.VITE_S3_PUBLIC_BASE_URL || '';
+const PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_S3_PUBLIC_BASE_URL || '';
 
 /**
  * 获取媒体文件的完整访问 URL

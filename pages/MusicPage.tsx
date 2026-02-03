@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
 import MusicHub from '../components/MusicHub';
 import SharedNavbar from '../components/SharedNavbar';
@@ -15,7 +14,6 @@ interface MusicPageProps {
 const MusicPage: React.FC<MusicPageProps> = ({ lang = 'zh' }) => {
   const [currentTrack, setCurrentTrack] = useState<MediaItem>(MUSIC[0]);
   const [isPlaying, setIsPlaying] = useState(false);
-  const navigate = useNavigate();
   const t = TRANSLATIONS[lang];
 
   const handlePlayTrack = (track: MediaItem) => {

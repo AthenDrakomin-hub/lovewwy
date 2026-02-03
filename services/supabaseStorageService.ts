@@ -8,8 +8,8 @@
  */
 export const testConnection = async () => {
   // 检查环境变量
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_AUTH_URL?.replace('/functions/v1/s3-auth', '');
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL?.replace('/functions/v1/s3-auth', '');
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase configuration in environment variables');
@@ -60,8 +60,8 @@ export const testConnection = async () => {
  */
 export const listBucketContents = async (bucket = 'wangyiyun', prefix?: string) => {
   try {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_AUTH_URL?.replace('/functions/v1/s3-auth', '');
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL?.replace('/functions/v1/s3-auth', '');
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error('Missing Supabase configuration (URL or ANON_KEY)');

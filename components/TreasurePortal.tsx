@@ -14,13 +14,22 @@ const TreasurePortal: React.FC<TreasurePortalProps> = ({ translations, links, on
   const categories: string[] = ['All', ...Array.from(new Set<string>(links.map(l => l.category)))];
   const filteredLinks = activeCategory === 'All' ? links : links.filter(l => l.category === activeCategory);
 
+  // Set staggered animation delays on client to avoid inline styles in server output
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const items = Array.from(document.querySelectorAll('.staggered-item')) as HTMLElement[];
+    items.forEach((el, i) => {
+      el.style.animationDelay = `${i * 0.05}s`;
+    });
+  }, [links]);
+
   return (
     <div className="fixed inset-0 z-[400] bg-[#050505] flex flex-col animate-fadeIn overflow-hidden">
       {/* Immersive Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/5 rounded-full blur-[150px]"></div>
         <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[150px]"></div>
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #333 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
+        <div className="absolute inset-0 opacity-20 radial-grid"></div>
       </div>
 
       {/* Header */}
@@ -74,8 +83,8 @@ const TreasurePortal: React.FC<TreasurePortalProps> = ({ translations, links, on
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative h-full animate-fadeIn"
-                style={{ animationDelay: `${idx * 0.05}s` }}
+                className="group relative h-full animate-fadeIn staggered-item"
+                data-anim-index={idx}
               >
                 <div className="h-full bg-zinc-900/40 backdrop-blur-md p-10 rounded-[48px] border border-white/5 hover:border-amber-500/40 transition-all duration-700 flex flex-col hover:-translate-y-4 hover:shadow-[0_40px_80px_rgba(0,0,0,0.8)]">
                   <div className="mb-8 flex items-center justify-between">
@@ -114,13 +123,7 @@ const TreasurePortal: React.FC<TreasurePortalProps> = ({ translations, links, on
          Protected Resource Layer &bull; Authorized Pro Access Only
       </footer>
 
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #fbbf24; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-      `}</style>
+
     </div>
   );
 };

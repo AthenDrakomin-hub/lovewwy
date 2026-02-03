@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import VideoFeed from '../components/VideoFeed';
 import SharedNavbar from '../components/SharedNavbar';
 import VideoModal from '../components/VideoModal';
@@ -12,7 +11,6 @@ interface VideosPageProps {
 
 const VideosPage: React.FC<VideosPageProps> = ({ lang = 'zh' }) => {
   const [activeVideo, setActiveVideo] = useState<MediaItem | null>(null);
-  const navigate = useNavigate();
   const t = TRANSLATIONS[lang];
 
   const handlePlayVideo = (video: MediaItem) => {

@@ -7,10 +7,10 @@
 打开 `.env.local`，检查这些变量：
 
 ```dotenv
-✅ VITE_SUPABASE_AUTH_URL=https://zlbemopcgjohrnyyiwvs.supabase.co
-✅ VITE_SUPABASE_ANON_KEY=eyJhbGc...
-✅ VITE_FUNCTIONS_URL=https://zlbemopcgjohrnyyiwvs.functions.supabase.co/s3-compat-storage
-✅ VITE_SUPABASE_S3_BUCKET=wangyiyun
+✅ NEXT_PUBLIC_SUPABASE_AUTH_URL=https://zlbemopcgjohrnyyiwvs.supabase.co
+✅ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+✅ NEXT_PUBLIC_FUNCTIONS_URL=https://zlbemopcgjohrnyyiwvs.functions.supabase.co/s3-compat-storage
+✅ NEXT_PUBLIC_SUPABASE_S3_BUCKET=wangyiyun
 ```
 
 **需要调整 VITE_FUNCTIONS_URL？**

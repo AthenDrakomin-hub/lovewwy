@@ -1,10 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { RouterProvider } from 'react-router-dom';
-import { router } from './router';
+// Legacy Vite entrypoint removed when migrating to Next.js.
+// Next.js uses the `app/` directory and server/client components.
+// This file is kept for reference and is intentionally inert.
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
-);
+export default {};

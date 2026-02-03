@@ -48,10 +48,12 @@ const VideoFeed: React.FC<VideoFeedProps> = ({ onPlayVideo, translations }) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredVideos.map((video) => (
-          <div 
-            key={video.id} 
-            className="glass rounded-[32px] overflow-hidden group hover:border-indigo-500/50 transition-all cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 flex flex-col"
+          <button
+            key={video.id}
+            type="button"
             onClick={() => onPlayVideo(video)}
+            aria-label={`Play ${video.title}`}
+            className="text-left glass rounded-[32px] overflow-hidden group hover:border-indigo-500/50 transition-all cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 flex flex-col"
           >
             <div className="relative aspect-video">
               <img 
@@ -87,7 +89,7 @@ const VideoFeed: React.FC<VideoFeedProps> = ({ onPlayVideo, translations }) => {
                 ))}
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

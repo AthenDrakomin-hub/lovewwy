@@ -12,7 +12,7 @@ type Props = {
 const S3Admin: React.FC<Props> = ({
   adminPassword,
   edgeBaseUrl = '',
-  defaultBucket = import.meta.env.VITE_SUPABASE_S3_BUCKET || 'wangyiyun',
+  defaultBucket = process.env.NEXT_PUBLIC_SUPABASE_S3_BUCKET || 'wangyiyun',
 }) => {
   const [prefix, setPrefix] = useState('music/');
   const [limit, setLimit] = useState(100);
@@ -39,7 +39,7 @@ const S3Admin: React.FC<Props> = ({
   // 使用环境变量或 props 提供的 Edge Function URL
   const FUNCTIONS_URL =
     edgeBaseUrl ||
-    (import.meta.env.VITE_FUNCTIONS_URL as string) ||
+    (process.env.NEXT_PUBLIC_FUNCTIONS_URL as string) ||
     '';
 
   useEffect(() => {
