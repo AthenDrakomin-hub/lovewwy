@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAccessToken } from '../src/lib/supabaseClient';
+import { listBucketContents } from '../services/supabaseStorageService';
 import { FilePreview } from './FilePreview';
 import { BatchOperations } from './BatchOperations';
 
@@ -48,53 +48,14 @@ const S3Admin: React.FC<Props> = ({
     }
   }, [adminPassword]);
 
-  const authFetch = async (path: string, opts: RequestInit = {}) => {
-    if (!adminPassword) throw new Error('Admin password required');
 
-    const token = await getAccessToken();
-    if (!token) throw new Error('Not authenticated - no token available');
-
-    const headers: Record<string, string> = {
-      ...(opts.headers as Record<string, string>) || {},
-      Authorization: `Bearer ${token}`,
-      'x-admin-password': adminPassword,
-    };
-
-    // 仅在 body 不是 FormData/Blob 且没有设置 Content-Type 时才设置
-    if (
-      !(opts.body instanceof FormData) &&
-      !(opts.body instanceof Blob) &&
-      !headers['Content-Type']
-    ) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    const url = `${FUNCTIONS_URL}${path}`;
-    const res = await fetch(url, { ...opts, headers });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`HTTP ${res.status}: ${text}`);
-    }
-    return res;
-  };
 
   const listObjects = async () => {
     try {
       setStatus('Loading...');
-      const qs = `?bucket=${encodeURIComponent(defaultBucket)}&prefix=${encodeURIComponent(
-        prefix
-      )}&limit=${limit}`;
-      const res = await authFetch(`/list${qs}`, { method: 'GET' });
-      const data = await res.json();
-
-      let arr: any[] = [];
-      if (Array.isArray(data)) arr = data;
-      else if (data.items) arr = data.items;
-      else if (data.objects) arr = data.objects;
-      else arr = data.files || data;
-
-      setItems(arr);
-      setStatus('Loaded');
+      const files = await listBucketContents(defaultBucket, prefix);
+      setItems(files);
+      setStatus(`Loaded ${files.length} items`);
     } catch (err: any) {
       setStatus(err.message || 'Error listing objects');
     }
