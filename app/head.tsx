@@ -4,8 +4,11 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'WYY AURA',
   description: 'WYY AURA Personal Space', // 建议加上描述，对 SEO 有好处
-  viewport: 'width=device-width, initial-scale=1',
-  charSet: 'utf-8',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
