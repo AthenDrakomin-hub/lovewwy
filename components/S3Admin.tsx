@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { listBucketContents } from '../services/supabaseStorageService';
+import { listBucketContents } from '../services/storageService';
 import { FilePreview } from './FilePreview';
 import { BatchOperations } from './BatchOperations';
 

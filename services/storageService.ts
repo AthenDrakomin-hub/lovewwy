@@ -34,11 +34,10 @@ export const getMediaUrl = (path: string): string => {
  * 获取存储桶中的文件列表
  * 注意：这需要一个支持 ListObjects 的后端API或Edge Function
  */
-export const listBucketContents = async (): Promise<any[]> => {
+export const listBucketContents = async (bucket?: string, prefix?: string): Promise<any[]> => {
   try {
-    // 这里需要一个后端API或Edge Function来列出存储桶中的文件
-    // 由于浏览器端无法直接列出S3存储桶内容，需要通过后端API实现
-    const response = await fetch('/api/list-files', {
+    const url = `/api/list-files${prefix ? `?prefix=${encodeURIComponent(prefix)}` : ''}`;
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
