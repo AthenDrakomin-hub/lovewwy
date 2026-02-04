@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { listBucketContents } from '../services/storageService';
 import { FilePreview } from './FilePreview';
 import { BatchOperations } from './BatchOperations';
-import { getAccessToken } from '../src/lib/supabaseClient';
+import { createAuthFetch } from '../src/lib/auth';
 
 type Props = {
   adminPassword?: string;
@@ -43,40 +43,10 @@ const S3Admin: React.FC<Props> = ({
     (process.env.NEXT_PUBLIC_FUNCTIONS_URL as string) ||
     '';
 
-  // ✅ 核心：带认证的 fetch 函数
-  const authFetch = async (path: string, opts: RequestInit = {}) => {
-    // 检查管理员密码
-    if (!adminPassword) throw new Error('Admin password required');
-
-    // 获取用户 token
-    const token = await getAccessToken();
-    if (!token) throw new Error('Not authenticated - no token available');
-
-    // ✅ 构建请求 headers
-    const headers: Record<string, string> = {
-      ...(opts.headers as Record<string, string>) || {},
-      Authorization: `Bearer ${token}`,           // ✅ 用户认证
-      'x-admin-password': adminPassword,          // ✅ 管理员认证
-    };
-
-    // 设置 Content-Type（仅当需要时）
-    if (
-      !(opts.body instanceof FormData) &&
-      !(opts.body instanceof Blob) &&
-      !headers['Content-Type']
-    ) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    // 发送请求
-    const url = `${FUNCTIONS_URL}${path}`;
-    const res = await fetch(url, { ...opts, headers });
-    if (!res.ok) {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(`HTTP ${res.status}: ${text}`);
-    }
-    return res;
-  };
+  // ✅ 使用可复用的 authFetch 函数（预设了 adminPassword 和 FUNCTIONS_URL）
+  const authFetch = adminPassword 
+    ? createAuthFetch(adminPassword, FUNCTIONS_URL)
+    : () => { throw new Error('Admin password required for authFetch'); };
 
   useEffect(() => {
     if (!adminPassword) {

@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { runSql } from '../../../../services/postgresService';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   const secretHeader = request.headers.get('x-migrate-secret') || null;
   const body = await request.json().catch(() => ({}));

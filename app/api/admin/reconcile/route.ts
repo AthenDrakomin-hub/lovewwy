@@ -3,6 +3,8 @@ import { getPendingSubscriptions, updateSubscriptionByOrderNo } from '../../../.
 import { getOrder } from '../../../../services/paymentService';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   const secretHeader = request.headers.get('x-migrate-secret') || null;
   const body = await request.json().catch(() => ({}));
