@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { listBucketContents } from '../services/storageService';
 import { FilePreview } from './FilePreview';
 import { BatchOperations } from './BatchOperations';
+import ChunkUploader from './ChunkUploader';
 import { createAuthFetch } from '../src/lib/auth';
 
 type Props = {

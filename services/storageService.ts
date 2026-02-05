@@ -91,3 +91,104 @@ export const listVideoFiles = async (): Promise<any[]> => {
     return [];
   }
 };
+
+/**
+ * 初始化分片上传
+ * @param filename 文件名
+ * @param contentType 文件类型，默认为 'application/octet-stream'
+ */
+export const initiateMultipartUpload = async (filename: string, contentType: string = 'application/octet-stream'): Promise<{ uploadId: string; key: string }> => {
+  try {
+    const response = await fetch('/api/upload/init', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filename, contentType }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error initiating multipart upload:', error);
+    throw error;
+  }
+};
+
+/**
+ * 上传分片
+ * @param uploadId 上传ID
+ * @param key 文件键
+ * @param partNumber 分片序号
+ * @param chunk 分片数据 (ArrayBuffer)
+ */
+export const uploadPart = async (uploadId: string, key: string, partNumber: number, chunk: ArrayBuffer): Promise<{ ETag: string; PartNumber: number }> => {
+  try {
+    const response = await fetch(`/api/upload/part?uploadId=${encodeURIComponent(uploadId)}&key=${encodeURIComponent(key)}&partNumber=${partNumber}`, {
+      method: 'PUT',
+      body: chunk,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error uploading part:', error);
+    throw error;
+  }
+};
+
+/**
+ * 完成分片上传
+ * @param uploadId 上传ID
+ * @param key 文件键
+ * @param parts 分片列表，包含 ETag 和 PartNumber
+ */
+export const completeMultipartUpload = async (uploadId: string, key: string, parts: Array<{ ETag: string; PartNumber: number }>): Promise<{ location: string; key: string }> => {
+  try {
+    const response = await fetch('/api/upload/complete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ uploadId, key, parts }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error completing multipart upload:', error);
+    throw error;
+  }
+};
+
+/**
+ * 取消分片上传
+ * @param uploadId 上传ID
+ * @param key 文件键
+ */
+export const abortMultipartUpload = async (uploadId: string, key: string): Promise<void> => {
+  try {
+    const response = await fetch(`/api/upload/abort?uploadId=${encodeURIComponent(uploadId)}&key=${encodeURIComponent(key)}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error aborting multipart upload:', error);
+    throw error;
+  }
+};
