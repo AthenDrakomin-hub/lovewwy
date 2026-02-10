@@ -29,7 +29,7 @@ export const MUSIC_MAPPINGS: FileMapping[] = [
   { originalName: 'qishi', chineseTitle: '其实', artist: '薛之谦', category: '流行', tags: ['情感', '深情'] },
   { originalName: 'ruguodeshi', chineseTitle: '如果的事', artist: '范玮琪', category: '流行', tags: ['友情', '温暖'] },
   { originalName: 'taohuajie', chineseTitle: '桃花结', artist: '未知艺术家', category: '古风', tags: ['古风', '中国风'] },
-  { originalName: 'wobushichenpingandabuliaobaiwanquan', chineseTitle: '我不是陈平安大不了白万全', artist: '未知艺术家', category: '流行', tags: ['现代', '个性'] },
+  { originalName: 'wobushichenpingandabuliaobaiwanquan', chineseTitle: '我不是陈平安大不了白万拳', artist: '未知艺术家', category: '流行', tags: ['现代', '个性'] },
   { originalName: 'xiayigetianiang', chineseTitle: '下一个天亮', artist: '郭静', category: '流行', tags: ['清新', '希望'] },
   { originalName: 'xuanzeshiyi', chineseTitle: '选择失忆', artist: '季彦霖', category: '流行', tags: ['情感', '悲伤'] },
   { originalName: 'yuyegangqing', chineseTitle: '雨夜钢琴', artist: '林志美', category: '经典', tags: ['经典', '怀旧'] },
@@ -46,27 +46,30 @@ export const VIDEO_MAPPINGS: FileMapping[] = [
 /**
  * 根据文件名获取映射信息
  * @param filename 文件名（可以带扩展名）
- * @param fileType 文件类型：'music' 或 'video'
+ * @param fileType 文件类型：'music'、'video' 或 'other'
  * @returns 映射信息或默认值
  */
-export function getFileMapping(filename: string, fileType: 'music' | 'video' = 'music'): FileMapping {
+export function getFileMapping(filename: string, fileType: 'music' | 'video' | 'other' = 'music'): FileMapping {
   // 去除扩展名和路径
   const nameWithoutExt = filename.replace(/\.[^/.]+$/, '').split('/').pop() || filename;
   
-  const mappings = fileType === 'music' ? MUSIC_MAPPINGS : VIDEO_MAPPINGS;
-  const mapping = mappings.find(m => m.originalName === nameWithoutExt);
-  
-  if (mapping) {
-    return mapping;
+  // 对于 'music' 和 'video' 类型，在对应的映射中查找
+  if (fileType === 'music' || fileType === 'video') {
+    const mappings = fileType === 'music' ? MUSIC_MAPPINGS : VIDEO_MAPPINGS;
+    const mapping = mappings.find(m => m.originalName === nameWithoutExt);
+    
+    if (mapping) {
+      return mapping;
+    }
   }
   
-  // 默认映射
+  // 默认映射（包括未找到映射的 'music'/'video' 类型和所有 'other' 类型）
   return {
     originalName: nameWithoutExt,
     chineseTitle: nameWithoutExt, // 如果没有映射，使用原文件名
-    artist: fileType === 'music' ? '未知艺术家' : '个人收藏',
-    category: fileType === 'music' ? '音乐' : '视频',
-    tags: fileType === 'music' ? ['音乐'] : ['视频'],
+    artist: fileType === 'music' ? '未知艺术家' : fileType === 'video' ? '个人收藏' : '未知',
+    category: fileType === 'music' ? '音乐' : fileType === 'video' ? '视频' : '其他',
+    tags: fileType === 'music' ? ['音乐'] : fileType === 'video' ? ['视频'] : ['其他'],
   };
 }
 
@@ -85,21 +88,26 @@ export function getFileTypeFromPath(path: string): 'music' | 'video' | 'other' {
   return 'other';
 }
 
+import { MediaItem } from '../types';
+
 /**
  * 将S3文件对象转换为媒体项
  * @param file S3文件对象
  * @returns 媒体项
  */
-export function convertS3FileToMediaItem(file: any) {
+export function convertS3FileToMediaItem(file: any): MediaItem {
   const fileType = getFileTypeFromPath(file.key);
   const mapping = getFileMapping(file.key, fileType);
   
   // 生成唯一ID
   const id = `dynamic_${fileType}_${file.key.replace(/[^a-zA-Z0-9]/g, '_')}`;
   
+  // 确定类型：如果是音乐文件则为 'audio'，否则为 'video'
+  const type: 'audio' | 'video' = fileType === 'music' ? 'audio' : 'video';
+  
   return {
     id,
-    type: fileType === 'music' ? 'audio' : 'video',
+    type,
     title: mapping.chineseTitle,
     artist: mapping.artist,
     thumbnail: getDefaultThumbnail(fileType, mapping.category),

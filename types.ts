@@ -10,6 +10,8 @@ export interface MediaItem {
   category: string;
   tags: string[];
   description?: string;
+  size?: number;
+  lastModified?: string;
 }
 
 export interface LinkItem {
