@@ -1,4 +1,3 @@
-
 import { MediaItem, Milestone, GalleryImage } from './types';
 
 // 首页推荐视频 - 路径调整为存储桶相对路径
@@ -15,55 +14,33 @@ export const FEATURED_VIDEO: MediaItem = {
   description: "Exploring the intersection of melody and vision at lovewyy.top."
 };
 
-// 视频列表 - 建议在 S3 存储桶中使用目录结构
-export const VIDEOS: MediaItem[] = [
+// 示例音乐列表（作为动态数据不可用时的后备）
+export const MUSIC: MediaItem[] = [
   {
-    id: 'v1',
-    type: 'video',
-    title: 'Neon Drift',
-    artist: 'WYY Archive',
-    thumbnail: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800',
-    url: 'videos/motion/neon-drift.mp4',
-    duration: '03:15',
-    category: 'Motion',
-    tags: ["Cyberpunk", "Fast", "Night"]
-  },
-  {
-    id: 'v2',
-    type: 'video',
-    title: 'Digital Serenity',
-    artist: 'WYY Archive',
-    thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
-    url: 'videos/ambient/digital-serenity.mp4',
-    duration: '05:40',
-    category: 'Ambient',
-    tags: ["Relax", "Space", "Minimal"]
+    id: 'sample1',
+    type: 'audio',
+    title: '示例音乐',
+    artist: '示例艺术家',
+    thumbnail: 'https://images.unsplash.com/photo-1514525253361-bee8718a300a?auto=format&fit=crop&q=80&w=400',
+    url: 'music/sample.mp3',
+    duration: '03:30',
+    category: '示例',
+    tags: ["示例", "测试"]
   }
 ];
 
-// 音乐列表
-export const MUSIC: MediaItem[] = [
+// 示例视频列表（作为动态数据不可用时的后备）
+export const VIDEOS: MediaItem[] = [
   {
-    id: 'a1',
-    type: 'audio',
-    title: 'Cyber Rain',
-    artist: 'Aura Beats',
-    thumbnail: 'https://images.unsplash.com/photo-1514525253361-bee8718a300a?auto=format&fit=crop&q=80&w=400',
-    url: 'music/lofi/cyber-rain.mp3',
-    duration: '04:12',
-    category: 'Lofi',
-    tags: ["Chill", "Rainy", "Focus"]
-  },
-  {
-    id: 'a2',
-    type: 'audio',
-    title: 'Solar Flare',
-    artist: 'Echo',
-    thumbnail: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=400',
-    url: 'music/synthwave/solar-flare.mp3',
-    duration: '03:45',
-    category: 'Synthwave',
-    tags: ["80s", "Retro", "Drive"]
+    id: 'sample2',
+    type: 'video',
+    title: '示例视频',
+    artist: '示例创作者',
+    thumbnail: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800',
+    url: 'videos/sample.mp4',
+    duration: '02:15',
+    category: '示例',
+    tags: ["示例", "测试"]
   }
 ];
 

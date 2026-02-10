@@ -1,7 +1,7 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { VIDEOS } from '../constants';
 import { MediaItem } from '../types';
+import { getVideoMediaItems } from '../services/storageService';
 
 interface VideoFeedProps {
   onPlayVideo: (video: MediaItem) => void;
@@ -10,16 +10,76 @@ interface VideoFeedProps {
 
 const VideoFeed: React.FC<VideoFeedProps> = ({ onPlayVideo, translations }) => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [videoData, setVideoData] = useState<MediaItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const categories = useMemo(() => {
-    const cats = ['All', ...new Set(VIDEOS.map(v => v.category))];
-    return cats;
+  // 加载视频数据
+  useEffect(() => {
+    const loadVideoData = async () => {
+      setIsLoading(true);
+      try {
+        const dynamicVideos = await getVideoMediaItems();
+        if (dynamicVideos.length > 0) {
+          setVideoData(dynamicVideos);
+        } else {
+          // 如果动态数据为空，使用硬编码数据
+          setVideoData(VIDEOS);
+        }
+      } catch (error) {
+        console.error('Error loading video data:', error);
+        // 出错时使用硬编码数据
+        setVideoData(VIDEOS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadVideoData();
   }, []);
 
+  const categories = useMemo(() => {
+    if (videoData.length === 0) return ['All'];
+    const cats = ['All', ...new Set(videoData.map(v => v.category))];
+    return cats;
+  }, [videoData]);
+
   const filteredVideos = useMemo(() => {
-    if (activeCategory === 'All') return VIDEOS;
-    return VIDEOS.filter(v => v.category === activeCategory);
-  }, [activeCategory]);
+    if (videoData.length === 0) return [];
+    if (activeCategory === 'All') return videoData;
+    return videoData.filter(v => v.category === activeCategory);
+  }, [activeCategory, videoData]);
+
+  if (isLoading) {
+    return (
+      <div className="py-24 px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+          <div>
+            <h2 className="text-4xl font-cinematic font-bold">{translations.title}</h2>
+            <p className="text-zinc-500 mt-2">{translations.desc}</p>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-zinc-500">加载视频数据中...</div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (videoData.length === 0) {
+    return (
+      <div className="py-24 px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+          <div>
+            <h2 className="text-4xl font-cinematic font-bold">{translations.title}</h2>
+            <p className="text-zinc-500 mt-2">{translations.desc}</p>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-zinc-500">暂无视频数据</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-24 px-8 max-w-7xl mx-auto">

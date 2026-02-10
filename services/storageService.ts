@@ -56,6 +56,9 @@ export const listBucketContents = async (bucket?: string, prefix?: string): Prom
   }
 };
 
+import { convertS3FileToMediaItem } from '../constants/fileMappings';
+import { MediaItem } from '../types';
+
 /**
  * 获取存储桶中的音乐文件列表
  */
@@ -89,6 +92,60 @@ export const listVideoFiles = async (): Promise<any[]> => {
   } catch (error) {
     console.error('Error listing video files:', error);
     return [];
+  }
+};
+
+/**
+ * 获取音乐媒体项列表（转换为中文显示）
+ */
+export const getMusicMediaItems = async (): Promise<MediaItem[]> => {
+  try {
+    const musicFiles = await listMusicFiles();
+    return musicFiles.map(file => convertS3FileToMediaItem({
+      key: file.path || file.key,
+      lastModified: file.lastModified,
+      size: file.size,
+    }));
+  } catch (error) {
+    console.error('Error getting music media items:', error);
+    return [];
+  }
+};
+
+/**
+ * 获取视频媒体项列表（转换为中文显示）
+ */
+export const getVideoMediaItems = async (): Promise<MediaItem[]> => {
+  try {
+    const videoFiles = await listVideoFiles();
+    return videoFiles.map(file => convertS3FileToMediaItem({
+      key: file.path || file.key,
+      lastModified: file.lastModified,
+      size: file.size,
+    }));
+  } catch (error) {
+    console.error('Error getting video media items:', error);
+    return [];
+  }
+};
+
+/**
+ * 获取所有媒体项（音乐和视频）
+ */
+export const getAllMediaItems = async (): Promise<{
+  music: MediaItem[];
+  videos: MediaItem[];
+}> => {
+  try {
+    const [music, videos] = await Promise.all([
+      getMusicMediaItems(),
+      getVideoMediaItems()
+    ]);
+    
+    return { music, videos };
+  } catch (error) {
+    console.error('Error getting all media items:', error);
+    return { music: [], videos: [] };
   }
 };
 

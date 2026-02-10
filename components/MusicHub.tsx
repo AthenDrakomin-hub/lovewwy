@@ -1,7 +1,7 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MUSIC } from '../constants';
 import { MediaItem } from '../types';
+import { getMusicMediaItems } from '../services/storageService';
 
 interface MusicHubProps {
   onPlayTrack: (track: MediaItem) => void;
@@ -12,16 +12,84 @@ interface MusicHubProps {
 
 const MusicHub: React.FC<MusicHubProps> = ({ onPlayTrack, currentTrackId, isPlaying, translations }) => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
-
-  const categories = useMemo(() => {
-    const cats = ['All', ...new Set(MUSIC.map(m => m.category))];
-    return cats;
+  const [musicData, setMusicData] = useState<MediaItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // 加载音乐数据
+  useEffect(() => {
+    const loadMusicData = async () => {
+      setIsLoading(true);
+      try {
+        const dynamicMusic = await getMusicMediaItems();
+        if (dynamicMusic.length > 0) {
+          setMusicData(dynamicMusic);
+        } else {
+          // 如果动态数据为空，使用硬编码数据
+          setMusicData(MUSIC);
+        }
+      } catch (error) {
+        console.error('Error loading music data:', error);
+        // 出错时使用硬编码数据
+        setMusicData(MUSIC);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadMusicData();
   }, []);
+  
+  const categories = useMemo(() => {
+    if (musicData.length === 0) return ['All'];
+    const cats = ['All', ...new Set(musicData.map(m => m.category))];
+    return cats;
+  }, [musicData]);
 
   const filteredMusic = useMemo(() => {
-    if (activeCategory === 'All') return MUSIC;
-    return MUSIC.filter(m => m.category === activeCategory);
-  }, [activeCategory]);
+    if (musicData.length === 0) return [];
+    if (activeCategory === 'All') return musicData;
+    return musicData.filter(m => m.category === activeCategory);
+  }, [activeCategory, musicData]);
+
+  if (isLoading) {
+    return (
+      <div className="py-24 px-8 md:px-16 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 mb-20">
+          <div className="max-w-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
+              <span className="text-indigo-400 font-black text-[10px] tracking-[0.4em] uppercase">Library</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-cinematic font-black mb-4">{translations.title}</h2>
+            <p className="text-zinc-500 text-lg font-light leading-relaxed">{translations.desc}</p>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-zinc-500">加载音乐数据中...</div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (musicData.length === 0) {
+    return (
+      <div className="py-24 px-8 md:px-16 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 mb-20">
+          <div className="max-w-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
+              <span className="text-indigo-400 font-black text-[10px] tracking-[0.4em] uppercase">Library</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-cinematic font-black mb-4">{translations.title}</h2>
+            <p className="text-zinc-500 text-lg font-light leading-relaxed">{translations.desc}</p>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-zinc-500">暂无音乐数据</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-24 px-8 md:px-16 max-w-7xl mx-auto">
