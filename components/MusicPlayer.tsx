@@ -7,6 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Song } from '../types';
 import { MOCK_SONGS } from '../constants';
+import { getPublicUrl } from '../lib/s3';
 
 interface MusicPlayerProps {
   currentSong: Song;
@@ -87,7 +88,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
       <div className="fixed bottom-0 left-0 right-0 h-20 glass-player z-50 px-4 md:px-8 flex items-center justify-between">
         <audio 
           ref={audioRef} 
-          src={currentSong.url} 
+          src={getPublicUrl(currentSong.url)} 
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
         />

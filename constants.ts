@@ -1,60 +1,80 @@
 
 import { Song, Comment, Video } from './types';
 
+// 使用S3存储桶中的实际音乐文件
+// 文件路径: music/文件名.mp3
+// 使用getPublicUrl函数获取完整URL
 export const MOCK_SONGS: Song[] = [
   {
     id: '1',
-    title: '平凡之路',
-    artist: '朴树',
-    cover: 'https://picsum.photos/seed/p1/400/400',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    title: '爱是你我一个错',
+    artist: '未知',
+    cover: 'https://picsum.photos/seed/aisini/400/400',
+    url: 'music/aisinishiyigecuo.mp3',
     lyrics: [
-      '徘徊着的 在路上的',
-      '你看过的 前方',
-      '蓝天下的 故乡',
-      '那是我最后的 倔强',
-      '我曾经跨过山和大海',
-      '也穿过人山人海',
-      '我曾经拥有着一切',
-      '转眼都飘散如烟',
-      '我曾经失落失望失掉所有方向',
-      '直到看见平凡才是唯一的答案'
+      '爱是你我一个错',
+      '相遇在错误的时刻',
+      '心动的感觉如此真实',
+      '却注定没有结果'
     ],
-    hotComment: '我曾经毁了我的一切，只想永远地离开。我曾经堕入无边黑暗，想挣扎无法自拔。'
+    hotComment: '有些相遇，注定是错。'
   },
   {
     id: '2',
-    title: '消愁',
-    artist: '毛不易',
-    cover: 'https://picsum.photos/seed/m2/400/400',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    title: '安和桥',
+    artist: '宋冬野',
+    cover: 'https://picsum.photos/seed/anheqiao/400/400',
+    url: 'music/anheqiao.mp3',
     lyrics: [
-      '当你走进这欢乐场',
-      '背上所有的梦与想',
-      '各色的脸上各色的妆',
-      '没人记得你的模样',
-      '一杯敬朝阳 一杯敬月光',
-      '唤醒我的向往 温柔了寒窗',
-      '一杯敬故乡 一杯敬远方',
-      '驱散了迷惘 打碎了夕阳'
+      '让我再看你一遍',
+      '从南到北',
+      '像是被五环路蒙住的双眼',
+      '请你再讲一遍',
+      '关于那天'
     ],
-    hotComment: '清醒的人最荒唐。'
+    hotComment: '我知道，那些夏天就像青春一样回不来。'
   },
   {
     id: '3',
-    title: '大鱼',
-    artist: '周深',
-    cover: 'https://picsum.photos/seed/d3/400/400',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+    title: '不负众望',
+    artist: '未知',
+    cover: 'https://picsum.photos/seed/bufu/400/400',
+    url: 'music/bufuzhongwang.mp3',
     lyrics: [
-      '海浪无声将夜幕深深淹没',
-      '漫过天空尽头的角落',
-      '大鱼在梦境的缝隙里游过',
-      '凝望你沉睡的轮廓',
-      '看海天一色 听风起雨落',
-      '执子之手 吹散苍茫茫甘霖'
+      '一路走来跌跌撞撞',
+      '不曾放弃心中梦想',
+      '那些质疑那些嘲笑',
+      '都化作前进的力量'
     ],
-    hotComment: '怕你飞远去，怕你离我而去，更怕你永远停留在这里。'
+    hotComment: '终于，我没有辜负那些期待的目光。'
+  },
+  {
+    id: '4',
+    title: '倒带',
+    artist: '蔡依林',
+    cover: 'https://picsum.photos/seed/daodai/400/400',
+    url: 'music/daodai.mp3',
+    lyrics: [
+      '终于看开爱回不来',
+      '而你总是太晚明白',
+      '最后才把话说开',
+      '哭着求我留下来'
+    ],
+    hotComment: '过去甜蜜在倒带，只是感觉已经不在。'
+  },
+  {
+    id: '5',
+    title: '恶作剧',
+    artist: '未知',
+    cover: 'https://picsum.photos/seed/ezuo/400/400',
+    url: 'music/ezuoju.mp3',
+    lyrics: [
+      '我们的爱情就像一场恶作剧',
+      '开始得突然结束得也离奇',
+      '你笑着说这只是个游戏',
+      '我却当了真付出了真心'
+    ],
+    hotComment: '原来我只是你恶作剧的对象。'
   }
 ];
 
