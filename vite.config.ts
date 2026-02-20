@@ -10,9 +10,18 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react()],
-      define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      build: {
+        chunkSizeWarningLimit: 1000,
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              vendor: ['react', 'react-dom', 'framer-motion'],
+              ui: ['lucide-react'],
+              aws: ['@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner'],
+              supabase: ['@supabase/supabase-js'],
+            }
+          }
+        }
       },
       resolve: {
         alias: {

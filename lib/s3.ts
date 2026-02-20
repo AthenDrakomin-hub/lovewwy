@@ -106,7 +106,14 @@ export async function getSignedFileUrl(key: string, expiresIn = 3600) {
  */
 export async function uploadFile(key: string, file: File | Buffer, contentType?: string) {
   try {
-    const body = file instanceof File ? await file.arrayBuffer() : file;
+    let body: Buffer | Uint8Array;
+    
+    if (file instanceof File) {
+      const arrayBuffer = await file.arrayBuffer();
+      body = new Uint8Array(arrayBuffer);
+    } else {
+      body = file;
+    }
     
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,

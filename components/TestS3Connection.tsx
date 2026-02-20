@@ -42,19 +42,19 @@ const TestS3Connection: React.FC = () => {
           <div>
             <span className="text-gray-400">端点: </span>
             <code className="bg-gray-800 px-2 py-1 rounded">
-              {import.meta.env.VITE_S3_ENDPOINT || 'https://zlbemopcgjohrnyyiwvs.storage.supabase.co/storage/v1/s3'}
+              {(import.meta as any).env.VITE_S3_ENDPOINT || 'https://zlbemopcgjohrnyyiwvs.storage.supabase.co/storage/v1/s3'}
             </code>
           </div>
           <div>
             <span className="text-gray-400">区域: </span>
             <code className="bg-gray-800 px-2 py-1 rounded">
-              {import.meta.env.VITE_S3_REGION || 'ap-south-1'}
+              {(import.meta as any).env.VITE_S3_REGION || 'ap-south-1'}
             </code>
           </div>
           <div>
             <span className="text-gray-400">Access Key ID: </span>
             <code className="bg-gray-800 px-2 py-1 rounded">
-              {import.meta.env.VITE_S3_ACCESS_KEY_ID ? '***' + import.meta.env.VITE_S3_ACCESS_KEY_ID.slice(-4) : '已配置'}
+              {(import.meta as any).env.VITE_S3_ACCESS_KEY_ID ? '***' + (import.meta as any).env.VITE_S3_ACCESS_KEY_ID.slice(-4) : '已配置'}
             </code>
           </div>
         </div>
