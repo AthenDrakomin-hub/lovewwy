@@ -22,20 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Local env files (do NOT commit)
-.env.local
-.env.*.local
-.env
-
-# Next.js build output
-.next
-out
-
-# Coverage and caches
-coverage
-.cache
-
-# Database and secrets
-*.sqlite
-secrets.json

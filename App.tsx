@@ -1,135 +1,180 @@
-'use client'
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import Hero from './components/Hero';
-import LanguageSwitcher from './components/LanguageSwitcher';
 
-import { TRANSLATIONS, Language } from './constants/translations';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Song } from './types';
+import { MOCK_SONGS } from './constants';
+import MusicPlayer from './components/MusicPlayer';
+import Hero from './components/Hero';
+import PlayerPage from './components/PlayerPage';
+import CommentWall from './components/CommentWall';
+import VideoCollection from './components/VideoCollection';
+import PrivateCollection from './components/PrivateCollection';
+import LonelyIsland from './components/LonelyIsland';
+import { supabase } from './lib/supabase';
+import { Music, MessageSquare, Video, User, Info, Home, Tent } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const App: React.FC = () => {
-  // 语言状态
-  const [lang, setLang] = useState<Language>('zh');
-  const t = TRANSLATIONS[lang];
-  const router = useRouter();
-  const pathname = usePathname() || '/';
+  const [currentView, setCurrentView] = useState<View>('home');
+  const [currentSong, setCurrentSong] = useState<Song>(MOCK_SONGS[0]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [bananaCount, setBananaCount] = useState(0);
 
-  // 导航功能
-  const goBack = () => {
-    router.back();
-  };
+  const listeningTimerRef = useRef<number>(0);
 
-  const goForward = () => {
-    router.forward();
-  };
-
-  const goToHome = () => {
-    router.push('/');
-  };
-
-  // 状态管理
-  const [isSubscribed, setIsSubscribed] = useState(false);
-
-  // 初始化加载
   useEffect(() => {
-    const savedLang = localStorage.getItem('aura-lang') as Language;
-    if (savedLang && TRANSLATIONS[savedLang]) setLang(savedLang);
-    
-    const savedSub = localStorage.getItem('aura-sub') === 'true';
-    setIsSubscribed(savedSub);
+    const fetchStats = async () => {
+      try {
+        const { data } = await supabase
+          .from('island_state')
+          .select('banana_count')
+          .single();
+        if (data) setBananaCount(data.banana_count);
+      } catch (e) {
+        console.warn('Supabase not configured or error fetching stats');
+      }
+    };
+    fetchStats();
   }, []);
 
-  const handleLangChange = (newLang: Language) => {
-    setLang(newLang);
-    localStorage.setItem('aura-lang', newLang);
+  useEffect(() => {
+    let interval: number;
+    if (isPlaying) {
+      interval = window.setInterval(async () => {
+        listeningTimerRef.current += 1;
+        if (listeningTimerRef.current >= 60) {
+          try {
+            const { error } = await (supabase as any).rpc('increment_banana');
+            if (!error) setBananaCount(prev => prev + 1);
+          } catch (e) {}
+          listeningTimerRef.current = 0;
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  const togglePlay = () => setIsPlaying(!isPlaying);
+
+  const handleSongEnded = async () => {
+    try {
+      await supabase.from('island_state').update({
+        banana_count: bananaCount + 2
+      }).match({ id: 1 });
+      setBananaCount(prev => prev + 2);
+    } catch (e) {}
+    nextSong();
   };
 
-  const handleSubscribe = () => {
-    setIsSubscribed(true);
-    localStorage.setItem('aura-sub', 'true');
+  const nextSong = () => {
+    const idx = MOCK_SONGS.findIndex(s => s.id === currentSong.id);
+    const nextIdx = (idx + 1) % MOCK_SONGS.length;
+    setCurrentSong(MOCK_SONGS[nextIdx]);
+  };
+
+  const prevSong = () => {
+    const idx = MOCK_SONGS.findIndex(s => s.id === currentSong.id);
+    const prevIdx = (idx - 1 + MOCK_SONGS.length) % MOCK_SONGS.length;
+    setCurrentSong(MOCK_SONGS[prevIdx]);
+  };
+
+  const selectSong = (song: Song) => {
+    setCurrentSong(song);
+    setIsPlaying(true);
+  };
+
+  const renderView = () => {
+    switch(currentView) {
+      case 'home': return <Hero onStartListening={() => setCurrentView('player')} onGoToWall={() => setCurrentView('wall')} />;
+      case 'player': return <PlayerPage song={currentSong} isPlaying={isPlaying} />;
+      case 'wall': return <CommentWall />;
+      case 'video': return <VideoCollection />;
+      case 'private': return <PrivateCollection />;
+      case 'island': return <LonelyIsland onBack={() => setCurrentView('home')} />;
+      case 'about':
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-24">
+            <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-3xl font-light tracking-[0.4em] mb-12 uppercase">人间不值得</motion.h1>
+            <div className="max-w-md space-y-6 text-[#8A8FB8] text-sm leading-loose font-light">
+              <p>以音为渡，静听人间。</p>
+              <p>收录心动过的旋律，留存看过的光影。</p>
+              <p>私人收藏，仅此而已。</p>
+            </div>
+            <button onClick={() => setCurrentView('island')} className="mt-12 group flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition duration-700">
+              <Tent size={18} className="text-[#8A8FB8] group-hover:text-white transition" />
+              <span className="text-[10px] tracking-[0.3em] text-[#8A8FB8] uppercase">发现孤岛</span>
+            </button>
+            <p className="mt-24 text-[10px] tracking-widest text-white/10 font-mono">lovewyy.top © 2026</p>
+          </div>
+        );
+      default: return <Hero onStartListening={() => setCurrentView('player')} onGoToWall={() => setCurrentView('wall')} />;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-indigo-500/30">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 h-24 px-12 flex items-center justify-between glass border-b border-white/5">
-        <div className="flex items-center gap-4 group cursor-pointer">
-          <Link href="/" className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 via-purple-600 to-amber-500 rounded-2xl aura-glow transition-all duration-500 group-hover:rotate-[15deg] group-hover:scale-110"></div>
-            <div className="hidden sm:block">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-cinematic font-black tracking-tighter block leading-none">WYY AURA</span>
-                {isSubscribed && <span className="text-[8px] bg-amber-500 text-black px-1.5 py-0.5 rounded-full font-black uppercase tracking-widest shadow-lg shadow-amber-500/20">Pro</span>}
-              </div>
-              <span className="text-[10px] text-zinc-500 font-bold tracking-[0.3em] uppercase opacity-60">Personal Media Hub</span>
-            </div>
-          </Link>
+    <div className="bg-[#0A0A0A] text-[#F0F0F0] selection:bg-white selection:text-black min-h-screen">
+      <nav className="fixed top-0 left-0 right-0 z-50 h-20 flex items-center justify-between px-6 md:px-12 pointer-events-none">
+        <div className="flex items-center gap-4 pointer-events-auto cursor-pointer" onClick={() => setCurrentView('home')}>
+          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#121212] to-[#222] border border-white/5 flex items-center justify-center shadow-2xl">
+            <div className="w-1.5 h-1.5 rounded-full bg-white opacity-40" />
+          </div>
+          <span className="text-[10px] font-medium tracking-[0.4em] uppercase hidden lg:block">人间不值得</span>
         </div>
-        
-        <div className="hidden md:flex gap-10 text-[11px] font-black tracking-[0.3em] uppercase">
-          <Link href="/music" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.home}</Link>
-          <Link href="/videos" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.visuals}</Link>
-          <Link href="/treasure" className="text-zinc-500 hover:text-white transition-all hover:scale-110">{t.nav.treasure}</Link>
-        </div>
-        
-        <div className="flex items-center gap-6">
-           <LanguageSwitcher currentLang={lang} onLangChange={handleLangChange} />
-           <Link href="/admin">
-             <button title="Admin" aria-label="Admin" className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:border-indigo-500 transition-all shadow-xl active:scale-90 group">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-zinc-500 group-hover:text-white" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-             </button>
-           </Link>
+
+        <div className="flex items-center gap-6 md:gap-10 pointer-events-auto">
+          <NavItem active={currentView === 'home'} onClick={() => setCurrentView('home')} icon={<Home size={18} />} label="首页" />
+          <NavItem active={currentView === 'player'} onClick={() => setCurrentView('player')} icon={<Music size={18} />} label="音乐" />
+          <NavItem active={currentView === 'wall'} onClick={() => setCurrentView('wall')} icon={<MessageSquare size={18} />} label="热评" />
+          <NavItem active={currentView === 'video'} onClick={() => setCurrentView('video')} icon={<Video size={18} />} label="影像" />
+          <NavItem active={currentView === 'private'} onClick={() => setCurrentView('private')} icon={<User size={18} />} label="私藏" />
+          <NavItem active={currentView === 'about'} onClick={() => setCurrentView('about')} icon={<Info size={18} />} label="关于" />
         </div>
       </nav>
 
-      <main className="animate-fadeIn pt-24">
-        {/* 根据当前路径显示相应内容 */}
-        {pathname === '/' && (
-          <>
-            <section className="min-h-screen flex items-center justify-center px-8">
-              <div className="text-center max-w-4xl">
-                <h1 className="text-6xl md:text-8xl font-cinematic font-black text-white mb-6 tracking-tight">
-                  WYY AURA
-                </h1>
-                <p className="text-xl md:text-2xl text-zinc-400 mb-8 max-w-2xl mx-auto leading-relaxed">
-                  Personal Media Hub & Digital Experience Platform
-                </p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  <Link href="/music" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full transition-all">
-                    进入音乐世界
-                  </Link>
-                  <Link href="/videos" className="px-8 py-3 border border-zinc-700 hover:border-indigo-500 text-white font-bold rounded-full transition-all">
-                    探索视觉
-                  </Link>
-                </div>
-              </div>
-            </section>
-
-            <footer className="py-20 text-center border-t border-zinc-900/50 bg-gradient-to-t from-black to-transparent">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-px bg-zinc-800"></div>
-                <p className="text-zinc-600 text-[10px] font-mono tracking-[0.8em] uppercase">lovewyy.top &bull; digital aura systems &copy; 2024</p>
-              </div>
-            </footer>
-          </>
-        )}
+      <main className="relative">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {renderView()}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
-      {isSubscribed && (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center p-6 animate-fadeIn">
-           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsSubscribed(false)}></div>
-           <div className="relative glass p-8 rounded-[32px] border border-amber-500/50 max-w-md w-full text-center shadow-[0_0_100px_rgba(245,158,11,0.2)]">
-              <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-amber-500/40">
-                 <svg viewBox="0 0 24 24" className="w-8 h-8 text-black" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>
-              </div>
-              <h3 className="text-2xl font-cinematic font-black mb-3">Thank You!</h3>
-              <p className="text-zinc-400 mb-6 text-sm">You are now subscribed to WYY AURA.</p>
-              <button onClick={() => setIsSubscribed(false)} className="w-full py-3 bg-white text-black font-black rounded-2xl hover:bg-amber-500 hover:text-white transition-all">CONTINUE</button>
-           </div>
-        </div>
-      )}
+      <MusicPlayer 
+        currentSong={currentSong}
+        isPlaying={isPlaying}
+        onTogglePlay={togglePlay}
+        onNext={handleSongEnded}
+        onPrev={prevSong}
+        onExpand={() => setCurrentView('player')}
+        onSelectSong={selectSong}
+      />
+
+      {/* Global Aesthetics: Cinematic Atmospheric Lighting */}
+      <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+        <div className="absolute top-[-20%] right-[-10%] w-[80vw] h-[80vw] bg-[#8A8FB8]/5 blur-[120px] rounded-full opacity-30" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-white/5 blur-[150px] rounded-full opacity-20" />
+      </div>
     </div>
   );
 };
+
+const NavItem = ({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) => (
+  <button 
+    onClick={onClick}
+    className={`flex flex-col items-center gap-1.5 group transition-all duration-500 ${active ? 'text-white' : 'text-[#8A8FB8]/60'}`}
+  >
+    <div className={`transition-all duration-500 ${active ? 'scale-110 translate-y-[-2px]' : 'group-hover:text-white/80'}`}>
+      {icon}
+    </div>
+    <span className={`text-[9px] font-light tracking-[0.2em] uppercase transition-all duration-500 ${active ? 'opacity-100' : 'opacity-0 scale-95'}`}>
+      {label}
+    </span>
+  </button>
+);
 
 export default App;
