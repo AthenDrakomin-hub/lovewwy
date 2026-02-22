@@ -20,22 +20,40 @@ async function testS3Connection() {
   console.log('存储桶:', bucketName);
   
   try {
-    const command = new ListObjectsV2Command({ Bucket: bucketName });
-    const response = await s3Client.send(command);
+    let continuationToken = undefined;
+    let allFiles = [];
+    let page = 1;
+    
+    do {
+      console.log(`正在获取第 ${page} 页...`);
+      const command = new ListObjectsV2Command({
+        Bucket: bucketName,
+        ContinuationToken: continuationToken,
+        MaxKeys: 1000,
+      });
+      const response = await s3Client.send(command);
+      
+      if (response.Contents) {
+        allFiles = allFiles.concat(response.Contents);
+      }
+      
+      continuationToken = response.NextContinuationToken;
+      page++;
+    } while (continuationToken);
     
     console.log('✅ S3连接成功！');
-    console.log('找到文件数量:', response.Contents?.length || 0);
+    console.log('找到文件数量:', allFiles.length);
     
-    if (response.Contents && response.Contents.length > 0) {
+    if (allFiles.length > 0) {
       console.log('\n前10个文件:');
-      response.Contents.slice(0, 10).forEach((file, index) => {
+      allFiles.slice(0, 10).forEach((file, index) => {
         console.log(`  ${index + 1}. ${file.Key} (${file.Size} bytes, 最后修改: ${file.LastModified})`);
       });
     } else {
       console.log('存储桶为空或无法访问文件列表。');
     }
     
-    return { success: true, fileCount: response.Contents?.length || 0 };
+    return { success: true, fileCount: allFiles.length };
   } catch (error) {
     console.error('❌ S3连接失败:');
     console.error('错误信息:', error.message);

@@ -1,6 +1,7 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand } from '@aws-sdk/client-s3';
+import { Song } from '../types';
 
 // 从环境变量获取S3配置
 const getEnv = (key: string) => {
@@ -39,12 +40,26 @@ const BUCKET_NAME = 'wangyiyun'; // 用户提供的存储桶名称
  */
 export async function listFiles(prefix?: string) {
   try {
-    const command = new ListObjectsV2Command({
-      Bucket: BUCKET_NAME,
-      Prefix: prefix,
-    });
-    const response = await s3Client.send(command);
-    return response.Contents || [];
+    let continuationToken: string | undefined;
+    let allFiles: any[] = [];
+    
+    do {
+      const command = new ListObjectsV2Command({
+        Bucket: BUCKET_NAME,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+        MaxKeys: 1000, // 每页最多1000个文件
+      });
+      const response = await s3Client.send(command);
+      
+      if (response.Contents) {
+        allFiles = allFiles.concat(response.Contents);
+      }
+      
+      continuationToken = response.NextContinuationToken;
+    } while (continuationToken);
+    
+    return allFiles;
   } catch (error) {
     console.error('Error listing files:', error);
     return [];
@@ -127,6 +142,91 @@ export async function uploadFile(key: string, file: File | Buffer, contentType?:
   } catch (error) {
     console.error('Error uploading file:', error);
     throw error;
+  }
+}
+
+/**
+ * 从S3获取所有音乐文件并转换为Song对象数组
+ */
+export async function getAllSongs(): Promise<Song[]> {
+  try {
+    const files = await listFiles('music/');
+    
+    // 过滤出.mp3文件
+    const musicFiles = files.filter(file => 
+      file.Key && file.Key.toLowerCase().endsWith('.mp3')
+    );
+    
+    // 热评库
+    const hotComments = [
+      '有些歌听得懂的时候，其实已经晚了。',
+      '那是最好的一年，也是最坏的一年。',
+      '希望能遇到那个让你觉得人间值得的人。',
+      '以音为渡，静听人间。',
+      '收录心动过的旋律，留存看过的光影。',
+      '私人收藏，仅此而已。',
+      '来自S3存储的音乐',
+      '音乐是心灵的避难所。',
+      '每一首歌都有一个故事。',
+      '听的是歌，想的是自己。'
+    ];
+    
+    // 歌词库（每首歌生成3-5行）
+    const lyricLines = [
+      '风吹过的街道，记忆中的你',
+      '时光匆匆，岁月静好',
+      '如果有一天，我们再次相遇',
+      '在茫茫人海中，寻找你的身影',
+      '雨后的天空，格外清澈',
+      '心中的旋律，永远不会停止',
+      '每一个音符，都是对你的思念',
+      '夜晚的星空，照亮前行的路',
+      '梦想与现实，交织在一起',
+      '珍惜当下，拥抱未来'
+    ];
+    
+    // 将文件转换为Song对象
+    const songs: Song[] = musicFiles.map((file, index) => {
+      const fileName = file.Key?.replace('music/', '').replace('.mp3', '') || `song-${index}`;
+      
+      // 从文件名生成标题（简单处理：将下划线或连字符替换为空格）
+      const title = fileName
+        .replace(/[_-]/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
+      
+      // 生成封面图片URL（使用picsum.photos，基于文件名生成种子）
+      const coverSeed = fileName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const coverUrl = `https://picsum.photos/seed/${coverSeed}/400/400`;
+      
+      // 随机选择热评
+      const hotCommentIndex = index % hotComments.length;
+      const hotComment = hotComments[hotCommentIndex];
+      
+      // 生成随机歌词（3-5行）
+      const lyricCount = 3 + (index % 3); // 3, 4, 5行
+      const lyrics: string[] = [];
+      for (let i = 0; i < lyricCount; i++) {
+        const lineIndex = (index + i) % lyricLines.length;
+        lyrics.push(lyricLines[lineIndex]);
+      }
+      
+      return {
+        id: `s3-${index + 1}`,
+        title: title,
+        artist: '未知', // 默认艺术家
+        cover: coverUrl,
+        url: file.Key || `music/${fileName}.mp3`,
+        lyrics: lyrics,
+        hotComment: hotComment
+      };
+    });
+    
+    console.log(`从S3获取了 ${songs.length} 首歌曲`);
+    return songs;
+  } catch (error) {
+    console.error('Error fetching songs from S3:', error);
+    // 出错时返回空数组
+    return [];
   }
 }
 

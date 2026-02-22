@@ -1,16 +1,30 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, ChevronRight, ChevronLeft } from 'lucide-react';
+import { MessageSquare, ChevronRight, ChevronLeft, Music } from 'lucide-react';
 import { Song } from '../types';
 
 interface PlayerPageProps {
-  song: Song;
+  song: Song | null;
   isPlaying: boolean;
 }
 
 const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying }) => {
   const [showFullComments, setShowFullComments] = useState(false);
+
+  if (!song) {
+    return (
+      <div className="min-h-screen pt-20 pb-24 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-32 h-32 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-8">
+            <Music size={48} className="text-white/20" />
+          </div>
+          <h2 className="text-2xl font-light tracking-widest text-white/60 mb-4">加载中...</h2>
+          <p className="text-[#8A8FB8] text-sm">正在从S3获取歌曲列表，请稍候。</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20 pb-24 px-4 flex transition-all duration-500 overflow-hidden">

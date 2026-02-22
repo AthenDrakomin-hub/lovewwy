@@ -6,11 +6,11 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Song } from '../types';
-import { MOCK_SONGS } from '../constants';
 import { getPublicUrl } from '../lib/s3';
 
 interface MusicPlayerProps {
-  currentSong: Song;
+  songs: Song[];
+  currentSong: Song | null;
   isPlaying: boolean;
   onTogglePlay: () => void;
   onNext: () => void;
@@ -22,6 +22,7 @@ interface MusicPlayerProps {
 type PlayMode = 'sequence' | 'loop' | 'shuffle';
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({ 
+  songs,
   currentSong, 
   isPlaying, 
   onTogglePlay, 
@@ -37,11 +38,13 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [playMode, setPlayMode] = useState<PlayMode>('sequence');
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [playlistPage, setPlaylistPage] = useState(1);
+  const songsPerPage = 5;
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
-      if (isPlaying) {
+      if (isPlaying && currentSong) {
         audioRef.current.play().catch(() => {});
       } else {
         audioRef.current.pause();
@@ -76,48 +79,77 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         audioRef.current.play();
       }
     } else if (playMode === 'shuffle') {
-      const randomIndex = Math.floor(Math.random() * MOCK_SONGS.length);
-      onSelectSong(MOCK_SONGS[randomIndex]);
+      if (songs.length > 0) {
+        const randomIndex = Math.floor(Math.random() * songs.length);
+        onSelectSong(songs[randomIndex]);
+      }
     } else {
       onNext();
     }
   };
 
+  // 当歌曲列表变化时，重置到第一页
+  useEffect(() => {
+    setPlaylistPage(1);
+  }, [songs]);
+
+  // 计算当前页的歌曲
+  const startIndex = (playlistPage - 1) * songsPerPage;
+  const endIndex = startIndex + songsPerPage;
+  const currentPageSongs = songs.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(songs.length / songsPerPage);
+
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 h-20 glass-player z-50 px-4 md:px-8 flex items-center justify-between">
-        <audio 
-          ref={audioRef} 
-          src={getPublicUrl(currentSong.url)} 
-          onTimeUpdate={handleTimeUpdate}
-          onEnded={handleEnded}
-        />
+        {currentSong && (
+          <audio 
+            ref={audioRef} 
+            src={getPublicUrl(currentSong.url)} 
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={handleEnded}
+          />
+        )}
         
         {/* Song Info & Visualizer */}
         <div className="flex items-center gap-4 w-1/4 min-w-0">
-          <div className="relative group cursor-pointer" onClick={onExpand}>
-            <img 
-              src={currentSong.cover} 
-              alt={currentSong.title} 
-              className={`w-12 h-12 rounded-md object-cover flex-shrink-0 transition-transform group-hover:scale-105 ${isPlaying ? 'shadow-[0_0_15px_rgba(255,255,255,0.1)]' : ''}`}
-            />
-            {isPlaying && (
-              <div className="absolute bottom-1 right-1 flex items-end gap-[2px] h-3 px-1 bg-black/40 backdrop-blur-sm rounded-sm">
-                {[1, 2, 3].map(i => (
-                  <motion.div 
-                    key={i}
-                    animate={{ height: [4, 10, 6, 12, 4] }}
-                    transition={{ repeat: Infinity, duration: 0.5 + i * 0.2, ease: "easeInOut" }}
-                    className="w-[2px] bg-white opacity-80"
-                  />
-                ))}
+          {currentSong ? (
+            <>
+              <div className="relative group cursor-pointer" onClick={onExpand}>
+                <img 
+                  src={currentSong.cover} 
+                  alt={currentSong.title} 
+                  className={`w-12 h-12 rounded-md object-cover flex-shrink-0 transition-transform group-hover:scale-105 ${isPlaying ? 'shadow-[0_0_15px_rgba(255,255,255,0.1)]' : ''}`}
+                />
+                {isPlaying && (
+                  <div className="absolute bottom-1 right-1 flex items-end gap-[2px] h-3 px-1 bg-black/40 backdrop-blur-sm rounded-sm">
+                    {[1, 2, 3].map(i => (
+                      <motion.div 
+                        key={i}
+                        animate={{ height: [4, 10, 6, 12, 4] }}
+                        transition={{ repeat: Infinity, duration: 0.5 + i * 0.2, ease: "easeInOut" }}
+                        className="w-[2px] bg-white opacity-80"
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          <div className="min-w-0">
-            <h4 className="text-sm font-medium truncate text-white/90">{currentSong.title}</h4>
-            <p className="text-[11px] text-[#8A8FB8] truncate mt-0.5">{currentSong.artist}</p>
-          </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-medium truncate text-white/90">{currentSong.title}</h4>
+                <p className="text-[11px] text-[#8A8FB8] truncate mt-0.5">{currentSong.artist}</p>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-md bg-white/5 flex items-center justify-center">
+                <div className="text-white/40 text-xs">无歌曲</div>
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-medium truncate text-white/40">未选择歌曲</h4>
+                <p className="text-[11px] text-[#8A8FB8] truncate mt-0.5">请等待加载...</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Central Controls */}
@@ -241,7 +273,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <div className="p-6 border-b border-white/5 flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-medium tracking-widest text-white/90">当前播放队列</h3>
-                  <p className="text-[10px] text-[#8A8FB8] mt-1">{MOCK_SONGS.length} 首曲目</p>
+                  <p className="text-[10px] text-[#8A8FB8] mt-1">{songs.length} 首曲目</p>
                 </div>
                 <button 
                   onClick={() => setIsPlaylistOpen(false)}
@@ -252,38 +284,69 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               </div>
               
               <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2">
-                {MOCK_SONGS.map((song) => (
-                  <div 
-                    key={song.id}
-                    onClick={() => {
-                      onSelectSong(song);
-                      setIsPlaylistOpen(false);
-                    }}
-                    className={`flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer group ${currentSong.id === song.id ? 'bg-white/5' : 'hover:bg-white/[0.02]'}`}
-                  >
-                    <div className="relative w-10 h-10 rounded overflow-hidden">
-                      <img src={song.cover} alt={song.title} className="w-full h-full object-cover" />
-                      {currentSong.id === song.id && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <motion.div 
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ repeat: Infinity, duration: 1.5 }}
-                            className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_8px_white]"
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className={`text-xs truncate ${currentSong.id === song.id ? 'text-white' : 'text-white/60 group-hover:text-white/80'}`}>
-                        {song.title}
-                      </h4>
-                      <p className="text-[10px] text-[#8A8FB8] truncate mt-0.5">{song.artist}</p>
-                    </div>
-                    <div className="text-[10px] font-mono text-[#8A8FB8]/40">
-                      3:45
-                    </div>
+                {songs.length === 0 ? (
+                  <div className="p-4 text-center text-white/40 text-sm">
+                    暂无歌曲，请等待加载...
                   </div>
-                ))}
+                ) : (
+                  <>
+                    {currentPageSongs.map((song) => (
+                      <div 
+                        key={song.id}
+                        onClick={() => {
+                          onSelectSong(song);
+                          setIsPlaylistOpen(false);
+                        }}
+                        className={`flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer group ${currentSong && currentSong.id === song.id ? 'bg-white/5' : 'hover:bg-white/[0.02]'}`}
+                      >
+                        <div className="relative w-10 h-10 rounded overflow-hidden">
+                          <img src={song.cover} alt={song.title} className="w-full h-full object-cover" />
+                          {currentSong && currentSong.id === song.id && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <motion.div 
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ repeat: Infinity, duration: 1.5 }}
+                                className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_8px_white]"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`text-xs truncate ${currentSong && currentSong.id === song.id ? 'text-white' : 'text-white/60 group-hover:text-white/80'}`}>
+                            {song.title}
+                          </h4>
+                          <p className="text-[10px] text-[#8A8FB8] truncate mt-0.5">{song.artist}</p>
+                        </div>
+                        <div className="text-[10px] font-mono text-[#8A8FB8]/40">
+                          3:45
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* 分页控件 */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between mt-4 px-2">
+                        <button 
+                          onClick={() => setPlaylistPage(prev => Math.max(prev - 1, 1))}
+                          disabled={playlistPage === 1}
+                          className="text-[#8A8FB8] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed text-xs"
+                        >
+                          上一页
+                        </button>
+                        <span className="text-xs text-[#8A8FB8]">
+                          第 {playlistPage} / {totalPages} 页
+                        </span>
+                        <button 
+                          onClick={() => setPlaylistPage(prev => Math.min(prev + 1, totalPages))}
+                          disabled={playlistPage === totalPages}
+                          className="text-[#8A8FB8] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed text-xs"
+                        >
+                          下一页
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </motion.div>
           </>

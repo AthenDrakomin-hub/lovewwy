@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Song } from './types';
-import { MOCK_SONGS } from './constants';
 import MusicPlayer from './components/MusicPlayer';
 import Hero from './components/Hero';
 import PlayerPage from './components/PlayerPage';
@@ -10,16 +9,34 @@ import VideoCollection from './components/VideoCollection';
 import PrivateCollection from './components/PrivateCollection';
 import LonelyIsland from './components/LonelyIsland';
 import { supabase } from './lib/supabase';
-import { Music, MessageSquare, Video, User, Info, Home, Tent } from 'lucide-react';
+import { getAllSongs } from './lib/s3';
+import { Music, MessageSquare, Video, User, Info, Home, Tent, Share2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('home');
-  const [currentSong, setCurrentSong] = useState<Song>(MOCK_SONGS[0]);
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [bananaCount, setBananaCount] = useState(0);
 
   const listeningTimerRef = useRef<number>(0);
+
+  // 从S3获取所有歌曲
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const fetchedSongs = await getAllSongs();
+        setSongs(fetchedSongs);
+        if (fetchedSongs.length > 0 && !currentSong) {
+          setCurrentSong(fetchedSongs[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch songs from S3:', error);
+      }
+    };
+    fetchSongs();
+  }, []);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -66,15 +83,17 @@ const App: React.FC = () => {
   };
 
   const nextSong = () => {
-    const idx = MOCK_SONGS.findIndex(s => s.id === currentSong.id);
-    const nextIdx = (idx + 1) % MOCK_SONGS.length;
-    setCurrentSong(MOCK_SONGS[nextIdx]);
+    if (!currentSong || songs.length === 0) return;
+    const idx = songs.findIndex(s => s.id === currentSong.id);
+    const nextIdx = (idx + 1) % songs.length;
+    setCurrentSong(songs[nextIdx]);
   };
 
   const prevSong = () => {
-    const idx = MOCK_SONGS.findIndex(s => s.id === currentSong.id);
-    const prevIdx = (idx - 1 + MOCK_SONGS.length) % MOCK_SONGS.length;
-    setCurrentSong(MOCK_SONGS[prevIdx]);
+    if (!currentSong || songs.length === 0) return;
+    const idx = songs.findIndex(s => s.id === currentSong.id);
+    const prevIdx = (idx - 1 + songs.length) % songs.length;
+    setCurrentSong(songs[prevIdx]);
   };
 
   const selectSong = (song: Song) => {
@@ -106,6 +125,43 @@ const App: React.FC = () => {
             <p className="mt-24 text-[10px] tracking-widest text-white/10 font-mono">lovewyy.top © 2026</p>
           </div>
         );
+      case 'share':
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-24">
+            <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-3xl font-light tracking-[0.4em] mb-12 uppercase">好物分享</motion.h1>
+            <div className="max-w-md space-y-8 text-[#8A8FB8] text-sm leading-loose font-light">
+              <div className="space-y-4">
+                <p className="text-white/80 mb-4">发现一些有趣的网站</p>
+                <a 
+                  href="https://ai.hubtoday.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-4 border border-white/10 rounded-lg hover:border-white/30 transition-all duration-300 hover:bg-white/5 group"
+                >
+                  <div className="text-white group-hover:text-white/90 transition">AI Hub Today</div>
+                  <div className="text-xs text-white/50 mt-1">https://ai.hubtoday.app/</div>
+                  <div className="text-xs text-white/30 mt-2">探索最新AI工具与资源</div>
+                </a>
+                <a 
+                  href="https://www.trjyy.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-4 border border-white/10 rounded-lg hover:border-white/30 transition-all duration-300 hover:bg-white/5 group"
+                >
+                  <div className="text-white group-hover:text-white/90 transition">今日推荐</div>
+                  <div className="text-xs text-white/50 mt-1">https://www.trjyy.com/</div>
+                  <div className="text-xs text-white/30 mt-2">每日精选推荐内容</div>
+                </a>
+              </div>
+              <p className="text-white/40 text-xs mt-8">更多好物分享，敬请期待...</p>
+            </div>
+            <button onClick={() => setCurrentView('home')} className="mt-12 group flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition duration-700">
+              <Home size={18} className="text-[#8A8FB8] group-hover:text-white transition" />
+              <span className="text-[10px] tracking-[0.3em] text-[#8A8FB8] uppercase">返回首页</span>
+            </button>
+            <p className="mt-24 text-[10px] tracking-widest text-white/10 font-mono">lovewyy.top © 2026</p>
+          </div>
+        );
       default: return <Hero onStartListening={() => setCurrentView('player')} onGoToWall={() => setCurrentView('wall')} />;
     }
   };
@@ -127,6 +183,7 @@ const App: React.FC = () => {
           <NavItem active={currentView === 'video'} onClick={() => setCurrentView('video')} icon={<Video size={18} />} label="影像" />
           <NavItem active={currentView === 'private'} onClick={() => setCurrentView('private')} icon={<User size={18} />} label="私藏" />
           <NavItem active={currentView === 'about'} onClick={() => setCurrentView('about')} icon={<Info size={18} />} label="关于" />
+          <NavItem active={currentView === 'share'} onClick={() => setCurrentView('share')} icon={<Share2 size={18} />} label="好物分享" />
         </div>
       </nav>
 
@@ -145,6 +202,7 @@ const App: React.FC = () => {
       </main>
 
       <MusicPlayer 
+        songs={songs}
         currentSong={currentSong}
         isPlaying={isPlaying}
         onTogglePlay={togglePlay}
