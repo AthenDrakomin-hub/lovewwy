@@ -26,7 +26,7 @@ export interface Video {
   description?: string;
 }
 
-export type View = 'home' | 'player' | 'wall' | 'video' | 'private' | 'about' | 'island' | 'share';
+export type View = 'home' | 'player' | 'wall' | 'video' | 'private' | 'about' | 'island' | 'share' | 'saavn';
 
 export interface Minion {
   id: number;

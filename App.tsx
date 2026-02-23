@@ -10,8 +10,9 @@ import PrivateCollection from './components/PrivateCollection';
 import LonelyIsland from './components/LonelyIsland';
 import { supabase } from './lib/supabase';
 import { getAllSongs } from './lib/s3';
-import { Music, MessageSquare, Video, User, Info, Home, Tent, Share2 } from 'lucide-react';
+import { Music, MessageSquare, Video, User, Info, Home, Tent, Share2, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import SaavnSearch from './components/SaavnSearch';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -125,6 +126,15 @@ const App: React.FC = () => {
             <p className="mt-24 text-[10px] tracking-widest text-white/10 font-mono">lovewyy.top © 2026</p>
           </div>
         );
+      case 'saavn':
+        return (
+          <SaavnSearch
+            onSelectSong={selectSong}
+            currentSong={currentSong}
+            isPlaying={isPlaying}
+            onTogglePlay={togglePlay}
+          />
+        );
       case 'share':
         return (
           <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-24">
@@ -183,6 +193,7 @@ const App: React.FC = () => {
           <NavItem active={currentView === 'video'} onClick={() => setCurrentView('video')} icon={<Video size={18} />} label="影像" />
           <NavItem active={currentView === 'private'} onClick={() => setCurrentView('private')} icon={<User size={18} />} label="私藏" />
           <NavItem active={currentView === 'about'} onClick={() => setCurrentView('about')} icon={<Info size={18} />} label="关于" />
+          <NavItem active={currentView === 'saavn'} onClick={() => setCurrentView('saavn')} icon={<Search size={18} />} label="Saavn" />
           <NavItem active={currentView === 'share'} onClick={() => setCurrentView('share')} icon={<Share2 size={18} />} label="好物分享" />
         </div>
       </nav>

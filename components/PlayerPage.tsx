@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, ChevronRight, ChevronLeft, Music } from 'lucide-react';
+import { MessageSquare, ChevronRight, ChevronLeft, Music, Loader } from 'lucide-react';
 import { Song } from '../types';
+import { getLyrics } from '../lib/saavn';
 
 interface PlayerPageProps {
   song: Song | null;
@@ -11,6 +12,49 @@ interface PlayerPageProps {
 
 const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying }) => {
   const [showFullComments, setShowFullComments] = useState(false);
+  const [lyrics, setLyrics] = useState<string[]>([]);
+  const [lyricsLoading, setLyricsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!song) {
+      setLyrics([]);
+      return;
+    }
+
+    // 如果歌曲已经有歌词，直接使用
+    if (song.lyrics && song.lyrics.length > 0) {
+      setLyrics(song.lyrics);
+      return;
+    }
+
+    // 检查是否为Saavn歌曲（根据ID前缀）
+    const isSaavnSong = song.id.startsWith('saavn-');
+    if (!isSaavnSong) {
+      // 非Saavn歌曲，使用空歌词或模拟歌词
+      setLyrics(song.lyrics || []);
+      return;
+    }
+
+    // 从Saavn API获取歌词
+    const fetchLyrics = async () => {
+      setLyricsLoading(true);
+      try {
+        const saavnId = song.id.replace('saavn-', '');
+        const fetchedLyrics = await getLyrics(saavnId);
+        setLyrics(fetchedLyrics);
+        
+        // 可选：更新歌曲对象的歌词（但注意不要直接修改prop）
+        // 在实际应用中，可能需要通过回调更新父组件的状态
+      } catch (error) {
+        console.error('Failed to fetch lyrics from Saavn:', error);
+        setLyrics([]);
+      } finally {
+        setLyricsLoading(false);
+      }
+    };
+
+    fetchLyrics();
+  }, [song]);
 
   if (!song) {
     return (
@@ -63,14 +107,25 @@ const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying }) => {
           <p className="text-[#8A8FB8] text-sm mb-8">{song.artist}</p>
           
           <div className="space-y-4 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">
-            {song.lyrics?.map((line, i) => (
-              <p 
-                key={i} 
-                className={`text-sm transition-all duration-700 ${i === 2 ? 'text-white text-lg font-medium opacity-100' : 'text-white/30'}`}
-              >
-                {line}
+            {lyricsLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader className="animate-spin text-[#8A8FB8] mb-2" size={20} />
+                <p className="text-xs text-[#8A8FB8]">加载歌词中...</p>
+              </div>
+            ) : lyrics.length > 0 ? (
+              lyrics.map((line, i) => (
+                <p 
+                  key={i} 
+                  className={`text-sm transition-all duration-700 ${i === 2 ? 'text-white text-lg font-medium opacity-100' : 'text-white/30'}`}
+                >
+                  {line}
+                </p>
+              ))
+            ) : (
+              <p className="text-sm text-white/30 text-center py-8">
+                暂无歌词
               </p>
-            ))}
+            )}
           </div>
         </div>
 

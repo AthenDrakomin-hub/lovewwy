@@ -279,19 +279,44 @@ export async function getAllSongs(): Promise<Song[]> {
     // 将文件转换为Song对象
     const songs: Song[] = musicFiles.map((file, index) => {
       const fileName = file.Key?.replace('music/', '').replace('.mp3', '') || `song-${index}`;
+      const fileKey = file.Key?.replace('music/', '') || `song-${index}.mp3`;
       
-      // 从文件名生成标题（简单处理：将下划线或连字符替换为空格）
-      let title = fileName
-        .replace(/[_-]/g, ' ')
-        .replace(/\b\w/g, char => char.toUpperCase());
+      // 尝试从localStorage获取中文标题
+      let title = '';
+      let artist = '未知';
+      let useCustomTitle = false;
       
-      // 自动翻译：如果标题主要是英文，尝试翻译成中文
-      if (isMostlyEnglish(title)) {
-        const translatedTitle = translateToChinese(title);
-        // 如果翻译结果与原文不同，使用翻译后的标题
-        if (translatedTitle !== title.toLowerCase()) {
-          title = translatedTitle;
-          console.log(`已翻译歌名: ${fileName} -> ${title}`);
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const titleMap = JSON.parse(localStorage.getItem('songTitleMap') || '{}');
+          const fileBaseName = fileKey.toLowerCase().replace(/[^a-z0-9.]/g, '-');
+          const customTitle = titleMap[fileBaseName];
+          
+          if (customTitle && customTitle.title && customTitle.title.trim() !== '') {
+            title = customTitle.title.trim();
+            artist = customTitle.artist && customTitle.artist.trim() !== '' ? customTitle.artist.trim() : '未知';
+            useCustomTitle = true;
+            console.log(`使用自定义标题: ${fileBaseName} -> ${title}`);
+          }
+        }
+      } catch (error) {
+        console.error('读取localStorage失败:', error);
+      }
+      
+      // 如果没有自定义标题，使用文件名生成标题
+      if (!useCustomTitle) {
+        title = fileName
+          .replace(/[_-]/g, ' ')
+          .replace(/\b\w/g, char => char.toUpperCase());
+        
+        // 自动翻译：如果标题主要是英文，尝试翻译成中文
+        if (isMostlyEnglish(title)) {
+          const translatedTitle = translateToChinese(title);
+          // 如果翻译结果与原文不同，使用翻译后的标题
+          if (translatedTitle !== title.toLowerCase()) {
+            title = translatedTitle;
+            console.log(`已翻译歌名: ${fileName} -> ${title}`);
+          }
         }
       }
       
@@ -314,7 +339,7 @@ export async function getAllSongs(): Promise<Song[]> {
       return {
         id: `s3-${index + 1}`,
         title: title,
-        artist: '未知', // 默认艺术家
+        artist: artist,
         cover: coverUrl,
         url: file.Key || `music/${fileName}.mp3`,
         lyrics: lyrics,
