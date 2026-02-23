@@ -26,7 +26,7 @@ export interface Video {
   description?: string;
 }
 
-export type View = 'home' | 'player' | 'wall' | 'video' | 'private' | 'about' | 'island' | 'share';
+export type View = 'home' | 'player' | 'wall' | 'video' | 'private' | 'about' | 'island' | 'share' | 'lonely' | 'midnight';
 
 export interface Minion {
   id: number;
@@ -48,4 +48,11 @@ export interface IslandState {
   island_level: number;
   max_minions: number;
   total_minions_raised: number;
+}
+
+export interface Playlist {
+  id: string;
+  name: string;
+  description?: string;
+  songIds: string[];
 }

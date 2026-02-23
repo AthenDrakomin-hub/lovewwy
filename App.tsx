@@ -8,6 +8,8 @@ import CommentWall from './components/CommentWall';
 import VideoCollection from './components/VideoCollection';
 import PrivateCollection from './components/PrivateCollection';
 import LonelyIsland from './components/LonelyIsland';
+import LonelyCollection from './components/LonelyCollection';
+import MidnightRadio from './components/MidnightRadio';
 import { supabase } from './lib/supabase';
 import { getAllSongs } from './lib/s3';
 import { Music, MessageSquare, Video, User, Info, Home, Tent, Share2 } from 'lucide-react';
@@ -109,6 +111,8 @@ const App: React.FC = () => {
       case 'video': return <VideoCollection />;
       case 'private': return <PrivateCollection />;
       case 'island': return <LonelyIsland onBack={() => setCurrentView('home')} />;
+      case 'lonely': return <LonelyCollection onBack={() => setCurrentView('home')} />;
+      case 'midnight': return <MidnightRadio onBack={() => setCurrentView('home')} />;
       case 'about':
         return (
           <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-24">

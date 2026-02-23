@@ -11,9 +11,10 @@ interface PlayerPageProps {
   isPlaying: boolean;
   onSelectSong: (song: Song) => void;
   onTogglePlay: () => void;
+  onNavigateToPlaylist?: (playlist: 'lonely' | 'midnight' | 'private') => void;
 }
 
-const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying, onSelectSong, onTogglePlay }) => {
+const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying, onSelectSong, onTogglePlay, onNavigateToPlaylist }) => {
   const [showFullComments, setShowFullComments] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [lyrics, setLyrics] = useState<string[]>([]);
@@ -110,9 +111,24 @@ const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying, onSelectSong, 
         <h3 className="text-xs font-medium tracking-widest text-[#8A8FB8] uppercase mb-6">我的歌单</h3>
         <ul className="space-y-4 text-sm text-white/60">
           <li className="text-white font-medium border-l-2 border-white pl-4">当前播放</li>
-          <li className="hover:text-white cursor-pointer pl-4 transition">孤独感集</li>
-          <li className="hover:text-white cursor-pointer pl-4 transition">午夜电台</li>
-          <li className="hover:text-white cursor-pointer pl-4 transition">私藏珍品</li>
+          <li 
+            onClick={() => onNavigateToPlaylist?.('lonely')}
+            className="hover:text-white cursor-pointer pl-4 transition hover:bg-white/5 hover:pl-6 rounded-r-lg"
+          >
+            孤独感集
+          </li>
+          <li 
+            onClick={() => onNavigateToPlaylist?.('midnight')}
+            className="hover:text-white cursor-pointer pl-4 transition hover:bg-white/5 hover:pl-6 rounded-r-lg"
+          >
+            午夜电台
+          </li>
+          <li 
+            onClick={() => onNavigateToPlaylist?.('private')}
+            className="hover:text-white cursor-pointer pl-4 transition hover:bg-white/5 hover:pl-6 rounded-r-lg"
+          >
+            私藏珍品
+          </li>
           <li 
             onClick={() => setShowSearch(true)}
             className="hover:text-white cursor-pointer pl-4 transition flex items-center gap-2 mt-8 pt-8 border-t border-white/10"
