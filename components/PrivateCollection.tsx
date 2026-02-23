@@ -26,6 +26,15 @@ const PrivateCollection: React.FC = () => {
   const [editingTitle, setEditingTitle] = useState('');
   const [editingArtist, setEditingArtist] = useState('');
 
+  // 视频上传相关状态
+  const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
+  const [videoTitle, setVideoTitle] = useState('');
+  const [videoDescription, setVideoDescription] = useState('');
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+  const [videoUploadError, setVideoUploadError] = useState<string | null>(null);
+  const [videoUploadSuccess, setVideoUploadSuccess] = useState(false);
+
   // 加载歌曲列表
   useEffect(() => {
     if (isAuthorized) {
@@ -198,6 +207,111 @@ const PrivateCollection: React.FC = () => {
   };
 
   // 取消编辑
+  // 视频文件选择
+  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // 检查文件类型
+      const validTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
+      const validExtensions = ['.mp4', '.webm', '.mov'];
+      const fileExt = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+      
+      if (!validTypes.includes(file.type) && !validExtensions.includes(fileExt)) {
+        setVideoUploadError('请选择MP4、WebM或MOV视频文件');
+        return;
+      }
+      setSelectedVideoFile(file);
+      setVideoUploadError(null);
+      setVideoUploadSuccess(false);
+      
+      // 从文件名生成视频标题
+      const fileName = file.name.replace(fileExt, '').replace(/_/g, ' ');
+      if (!videoTitle) {
+        setVideoTitle(fileName);
+      }
+    }
+  };
+
+  // 视频上传处理
+  const handleVideoUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedVideoFile) {
+      setVideoUploadError('请先选择视频文件');
+      return;
+    }
+
+    setVideoUploading(true);
+    setVideoUploadProgress(0);
+    setVideoUploadError(null);
+    setVideoUploadSuccess(false);
+
+    try {
+      // 生成文件key：videos/文件名.mp4
+      const fileName = selectedVideoFile.name.toLowerCase().replace(/[^a-z0-9.]/g, '-');
+      const key = `videos/${fileName}`;
+      
+      // 保存视频信息到localStorage（可选）
+      if (videoTitle && videoTitle.trim() !== '') {
+        try {
+          const videoMap = JSON.parse(localStorage.getItem('videoTitleMap') || '{}');
+          videoMap[fileName] = {
+            title: videoTitle.trim(),
+            description: videoDescription.trim(),
+            timestamp: new Date().toISOString()
+          };
+          localStorage.setItem('videoTitleMap', JSON.stringify(videoMap));
+          console.log('视频信息已保存到localStorage:', fileName, videoTitle);
+        } catch (storageError) {
+          console.error('保存到localStorage失败:', storageError);
+        }
+      }
+      
+      // 模拟上传进度
+      const progressInterval = setInterval(() => {
+        setVideoUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
+      // 实际上传文件
+      const publicUrl = await uploadFile(key, selectedVideoFile);
+      
+      clearInterval(progressInterval);
+      setVideoUploadProgress(100);
+      setVideoUploadSuccess(true);
+      
+      // 重置表单
+      setTimeout(() => {
+        setSelectedVideoFile(null);
+        setVideoTitle('');
+        setVideoDescription('');
+        setVideoUploadProgress(0);
+        setVideoUploadSuccess(false);
+      }, 3000);
+
+      console.log('视频上传成功:', publicUrl);
+    } catch (error) {
+      setVideoUploadError(error instanceof Error ? error.message : '上传失败');
+      setVideoUploadProgress(0);
+    } finally {
+      setVideoUploading(false);
+    }
+  };
+
+  // 重置视频上传
+  const resetVideoUpload = () => {
+    setSelectedVideoFile(null);
+    setVideoTitle('');
+    setVideoDescription('');
+    setVideoUploadError(null);
+    setVideoUploadSuccess(false);
+    setVideoUploadProgress(0);
+  };
+
   const cancelEditSong = () => {
     setEditingSongId(null);
   };
@@ -486,33 +600,6 @@ const PrivateCollection: React.FC = () => {
           </div>
         </section>
 
-        {/* Module 2: Favorite Playlists */}
-        <section>
-          <div className="flex items-center gap-3 mb-8">
-            <Music size={16} className="text-[#8A8FB8]" />
-            <h3 className="text-xs font-medium tracking-[0.2em] text-[#8A8FB8] uppercase">收藏的歌单</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {MOCK_PRIVATE_PLAYLISTS.map((playlist) => (
-              <div 
-                key={playlist.id}
-                className="group flex items-center justify-between p-6 bg-[#161616] border border-white/5 rounded-xl hover:border-white/10 transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded bg-white/5 flex items-center justify-center">
-                    <Music size={18} className="text-white/20 group-hover:text-white/40 transition" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-light tracking-wide">{playlist.name}</h4>
-                    <p className="text-[10px] text-[#8A8FB8] mt-1 uppercase tracking-tighter">{playlist.count} 首歌曲</p>
-                  </div>
-                </div>
-                <ChevronRight size={14} className="text-white/10 group-hover:text-white transition" />
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Module 2: Favorite Comments */}
         <section>
           <div className="flex items-center gap-3 mb-8">
@@ -536,33 +623,133 @@ const PrivateCollection: React.FC = () => {
           </div>
         </section>
 
-        {/* Module 3: Private Videos */}
+        {/* Module 3: Private Videos - Upload and Edit */}
         <section>
           <div className="flex items-center gap-3 mb-8">
             <VideoIcon size={16} className="text-[#8A8FB8]" />
-            <h3 className="text-xs font-medium tracking-[0.2em] text-[#8A8FB8] uppercase">私密影像</h3>
+            <h3 className="text-xs font-medium tracking-[0.2em] text-[#8A8FB8] uppercase">私密影像上传</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {MOCK_PRIVATE_VIDEOS.map((video) => (
-              <div key={video.id} className="group cursor-pointer">
-                <div className="relative aspect-video overflow-hidden rounded-xl bg-[#161616] border border-white/5">
-                  <img 
-                    src={video.thumbnail} 
-                    alt={video.title} 
-                    className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-700"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-                      <Lock size={16} className="text-white/40" />
+          <div className="p-8 bg-[#161616] border border-white/5 rounded-xl">
+            <form onSubmit={handleVideoUpload} className="space-y-6">
+              {/* 文件选择区域 */}
+              <div className="space-y-4">
+                <label className="block text-sm font-light text-[#8A8FB8]">
+                  选择视频文件 (MP4, WebM, MOV)
+                </label>
+                <div className="flex items-center gap-4">
+                  <label className="flex-1 cursor-pointer">
+                    <div className={`p-8 border-2 border-dashed rounded-xl text-center transition-all ${selectedVideoFile ? 'border-white/20 bg-white/5' : 'border-white/10 hover:border-white/20'}`}>
+                      {selectedVideoFile ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-center gap-2">
+                            <VideoIcon size={24} className="text-white/40" />
+                            <span className="text-sm font-light truncate max-w-xs">{selectedVideoFile.name}</span>
+                          </div>
+                          <p className="text-xs text-[#8A8FB8]">
+                            {(selectedVideoFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <Upload size={32} className="mx-auto text-white/20" />
+                          <p className="text-sm text-[#8A8FB8]">点击或拖拽视频文件到此区域</p>
+                          <p className="text-xs text-white/30">支持MP4、WebM、MOV格式，最大200MB</p>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime"
+                        onChange={handleVideoSelect}
+                        className="hidden"
+                        disabled={videoUploading}
+                      />
                     </div>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <h4 className="text-sm font-light tracking-wide">{video.title}</h4>
-                  <p className="text-[10px] text-[#8A8FB8] mt-1 font-light italic">{video.description}</p>
+                  </label>
+                  {selectedVideoFile && (
+                    <button
+                      type="button"
+                      onClick={resetVideoUpload}
+                      className="p-2 text-white/40 hover:text-white transition"
+                      disabled={videoUploading}
+                    >
+                      <X size={20} />
+                    </button>
+                  )}
                 </div>
               </div>
-            ))}
+
+              {/* 视频信息 */}
+              {selectedVideoFile && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-light text-[#8A8FB8] mb-2">
+                      视频标题
+                    </label>
+                    <input
+                      type="text"
+                      value={videoTitle}
+                      onChange={(e) => setVideoTitle(e.target.value)}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-white/30 transition-all text-sm"
+                      placeholder="输入视频标题"
+                      disabled={videoUploading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-light text-[#8A8FB8] mb-2">
+                      视频描述
+                    </label>
+                    <textarea
+                      value={videoDescription}
+                      onChange={(e) => setVideoDescription(e.target.value)}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-white/30 transition-all text-sm h-24 resize-none"
+                      placeholder="输入视频描述（可选）"
+                      disabled={videoUploading}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 上传进度 */}
+              {videoUploading && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-[#8A8FB8]">
+                    <span>上传中...</span>
+                    <span>{videoUploadProgress}%</span>
+                  </div>
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-white/80 transition-all duration-300"
+                      style={{ width: `${videoUploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 状态消息 */}
+              {videoUploadError && (
+                <div className="p-3 bg-red-900/20 border border-red-700/50 rounded-lg">
+                  <p className="text-sm text-red-400">{videoUploadError}</p>
+                </div>
+              )}
+
+              {videoUploadSuccess && (
+                <div className="p-3 bg-green-900/20 border border-green-700/50 rounded-lg flex items-center gap-2">
+                  <Check size={16} className="text-green-400" />
+                  <p className="text-sm text-green-400">上传成功！视频已添加到您的私密影像。</p>
+                </div>
+              )}
+
+              {/* 上传按钮 */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={!selectedVideoFile || videoUploading}
+                  className={`w-full py-3 rounded-lg text-sm font-medium tracking-widest uppercase transition-all ${!selectedVideoFile || videoUploading ? 'bg-white/10 text-white/30 cursor-not-allowed' : 'bg-white text-black hover:bg-[#F0F0F0]'}`}
+                >
+                  {videoUploading ? '上传中...' : '上传视频'}
+                </button>
+              </div>
+            </form>
           </div>
         </section>
       </div>

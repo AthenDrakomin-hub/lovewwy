@@ -1,17 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, ChevronRight, ChevronLeft, Music, Loader } from 'lucide-react';
+import { MessageSquare, ChevronRight, ChevronLeft, Music, Loader, Search } from 'lucide-react';
 import { Song } from '../types';
 import { getLyrics } from '../lib/saavn';
+import SaavnSearch from './SaavnSearch';
 
 interface PlayerPageProps {
   song: Song | null;
   isPlaying: boolean;
+  onSelectSong: (song: Song) => void;
+  onTogglePlay: () => void;
 }
 
-const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying }) => {
+const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying, onSelectSong, onTogglePlay }) => {
   const [showFullComments, setShowFullComments] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [lyrics, setLyrics] = useState<string[]>([]);
   const [lyricsLoading, setLyricsLoading] = useState(false);
 
@@ -56,6 +60,34 @@ const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying }) => {
     fetchLyrics();
   }, [song]);
 
+  // 如果显示搜索模式，渲染Saavn搜索组件
+  if (showSearch) {
+    return (
+      <div className="min-h-screen pt-20 pb-24 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => setShowSearch(false)}
+              className="flex items-center gap-2 text-[#8A8FB8] hover:text-white transition"
+            >
+              <ChevronLeft size={18} />
+              <span className="text-sm">返回播放器</span>
+            </button>
+            <h1 className="text-2xl font-light tracking-widest">Saavn 音乐搜索</h1>
+            <div className="w-10"></div> {/* 占位 */}
+          </div>
+          <SaavnSearch
+            onSelectSong={onSelectSong}
+            currentSong={song}
+            isPlaying={isPlaying}
+            onTogglePlay={onTogglePlay}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 如果没有歌曲，显示加载状态
   if (!song) {
     return (
       <div className="min-h-screen pt-20 pb-24 px-4 flex items-center justify-center">
@@ -70,6 +102,7 @@ const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying }) => {
     );
   }
 
+  // 正常播放器界面
   return (
     <div className="min-h-screen pt-20 pb-24 px-4 flex transition-all duration-500 overflow-hidden">
       {/* Sidebar - Song List Placeholder */}
@@ -80,6 +113,13 @@ const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying }) => {
           <li className="hover:text-white cursor-pointer pl-4 transition">孤独感集</li>
           <li className="hover:text-white cursor-pointer pl-4 transition">午夜电台</li>
           <li className="hover:text-white cursor-pointer pl-4 transition">私藏珍品</li>
+          <li 
+            onClick={() => setShowSearch(true)}
+            className="hover:text-white cursor-pointer pl-4 transition flex items-center gap-2 mt-8 pt-8 border-t border-white/10"
+          >
+            <Search size={14} />
+            <span>搜索 Saavn 音乐</span>
+          </li>
         </ul>
       </div>
 
@@ -158,6 +198,15 @@ const PlayerPage: React.FC<PlayerPageProps> = ({ song, isPlaying }) => {
         className="fixed right-4 top-1/2 -translate-y-1/2 p-2 bg-white/5 hover:bg-white/10 rounded-full text-[#8A8FB8] hover:text-white transition hidden lg:block"
       >
         {showFullComments ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+      </button>
+
+      {/* Mobile Search Button */}
+      <button
+        onClick={() => setShowSearch(true)}
+        className="fixed bottom-24 right-4 lg:hidden p-4 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md border border-white/20 shadow-2xl z-40 transition-all"
+        aria-label="搜索音乐"
+      >
+        <Search size={24} />
       </button>
     </div>
   );

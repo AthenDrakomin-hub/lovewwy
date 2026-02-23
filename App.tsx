@@ -10,9 +10,8 @@ import PrivateCollection from './components/PrivateCollection';
 import LonelyIsland from './components/LonelyIsland';
 import { supabase } from './lib/supabase';
 import { getAllSongs } from './lib/s3';
-import { Music, MessageSquare, Video, User, Info, Home, Tent, Share2, Search } from 'lucide-react';
+import { Music, MessageSquare, Video, User, Info, Home, Tent, Share2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import SaavnSearch from './components/SaavnSearch';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -105,7 +104,7 @@ const App: React.FC = () => {
   const renderView = () => {
     switch(currentView) {
       case 'home': return <Hero onStartListening={() => setCurrentView('player')} onGoToWall={() => setCurrentView('wall')} />;
-      case 'player': return <PlayerPage song={currentSong} isPlaying={isPlaying} />;
+      case 'player': return <PlayerPage song={currentSong} isPlaying={isPlaying} onSelectSong={selectSong} onTogglePlay={togglePlay} />;
       case 'wall': return <CommentWall />;
       case 'video': return <VideoCollection />;
       case 'private': return <PrivateCollection />;
@@ -125,15 +124,6 @@ const App: React.FC = () => {
             </button>
             <p className="mt-24 text-[10px] tracking-widest text-white/10 font-mono">lovewyy.top © 2026</p>
           </div>
-        );
-      case 'saavn':
-        return (
-          <SaavnSearch
-            onSelectSong={selectSong}
-            currentSong={currentSong}
-            isPlaying={isPlaying}
-            onTogglePlay={togglePlay}
-          />
         );
       case 'share':
         return (
@@ -178,12 +168,13 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-[#0A0A0A] text-[#F0F0F0] selection:bg-white selection:text-black min-h-screen">
-      <nav className="fixed top-0 left-0 right-0 z-50 h-20 flex items-center justify-between px-6 md:px-12 pointer-events-none">
+      {/* Top Navigation - Desktop */}
+      <nav className="fixed top-0 left-0 right-0 z-50 h-20 flex items-center justify-between px-6 md:px-12 pointer-events-none hidden lg:flex">
         <div className="flex items-center gap-4 pointer-events-auto cursor-pointer" onClick={() => setCurrentView('home')}>
           <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#121212] to-[#222] border border-white/5 flex items-center justify-center shadow-2xl">
             <div className="w-1.5 h-1.5 rounded-full bg-white opacity-40" />
           </div>
-          <span className="text-[10px] font-medium tracking-[0.4em] uppercase hidden lg:block">人间不值得</span>
+          <span className="text-[10px] font-medium tracking-[0.4em] uppercase">人间不值得</span>
         </div>
 
         <div className="flex items-center gap-6 md:gap-10 pointer-events-auto">
@@ -193,9 +184,18 @@ const App: React.FC = () => {
           <NavItem active={currentView === 'video'} onClick={() => setCurrentView('video')} icon={<Video size={18} />} label="影像" />
           <NavItem active={currentView === 'private'} onClick={() => setCurrentView('private')} icon={<User size={18} />} label="私藏" />
           <NavItem active={currentView === 'about'} onClick={() => setCurrentView('about')} icon={<Info size={18} />} label="关于" />
-          <NavItem active={currentView === 'saavn'} onClick={() => setCurrentView('saavn')} icon={<Search size={18} />} label="Saavn" />
           <NavItem active={currentView === 'share'} onClick={() => setCurrentView('share')} icon={<Share2 size={18} />} label="好物分享" />
         </div>
+      </nav>
+
+      {/* Bottom Navigation - Mobile */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 h-16 bg-black/80 backdrop-blur-md border-t border-white/10 flex items-center justify-around pointer-events-auto lg:hidden">
+        <NavItem active={currentView === 'home'} onClick={() => setCurrentView('home')} icon={<Home size={20} />} label="首页" mobile />
+        <NavItem active={currentView === 'player'} onClick={() => setCurrentView('player')} icon={<Music size={20} />} label="音乐" mobile />
+        <NavItem active={currentView === 'wall'} onClick={() => setCurrentView('wall')} icon={<MessageSquare size={20} />} label="热评" mobile />
+        <NavItem active={currentView === 'video'} onClick={() => setCurrentView('video')} icon={<Video size={20} />} label="影像" mobile />
+        <NavItem active={currentView === 'private'} onClick={() => setCurrentView('private')} icon={<User size={20} />} label="私藏" mobile />
+        <NavItem active={currentView === 'about'} onClick={() => setCurrentView('about')} icon={<Info size={20} />} label="关于" mobile />
       </nav>
 
       <main className="relative">
@@ -232,15 +232,15 @@ const App: React.FC = () => {
   );
 };
 
-const NavItem = ({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) => (
+const NavItem = ({ active, onClick, icon, label, mobile = false }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; mobile?: boolean }) => (
   <button 
     onClick={onClick}
-    className={`flex flex-col items-center gap-1.5 group transition-all duration-500 ${active ? 'text-white' : 'text-[#8A8FB8]/60'}`}
+    className={`flex flex-col items-center justify-center ${mobile ? 'flex-1 h-full' : 'gap-1.5'} group transition-all duration-500 ${active ? 'text-white' : 'text-[#8A8FB8]/60'}`}
   >
-    <div className={`transition-all duration-500 ${active ? 'scale-110 translate-y-[-2px]' : 'group-hover:text-white/80'}`}>
+    <div className={`transition-all duration-500 ${active ? (mobile ? 'scale-110' : 'scale-110 translate-y-[-2px]') : 'group-hover:text-white/80'}`}>
       {icon}
     </div>
-    <span className={`text-[9px] font-light tracking-[0.2em] uppercase transition-all duration-500 ${active ? 'opacity-100' : 'opacity-0 scale-95'}`}>
+    <span className={`${mobile ? 'text-[8px] mt-1' : 'text-[9px]'} font-light tracking-[0.2em] uppercase transition-all duration-500 ${active ? 'opacity-100' : 'opacity-0 scale-95'}`}>
       {label}
     </span>
   </button>
