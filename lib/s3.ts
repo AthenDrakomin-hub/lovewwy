@@ -1,7 +1,98 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand } from '@aws-sdk/client-s3';
-import { Song } from '../types';
+import { Song, Video, Comment } from '../types';
+
+// 简单英文到中文翻译映射
+const TRANSLATION_MAP: Record<string, string> = {
+  'love': '爱',
+  'you': '你',
+  'me': '我',
+  'hello': '你好',
+  'world': '世界',
+  'music': '音乐',
+  'song': '歌曲',
+  'heart': '心',
+  'dream': '梦',
+  'sky': '天空',
+  'star': '星星',
+  'moon': '月亮',
+  'sun': '太阳',
+  'rain': '雨',
+  'snow': '雪',
+  'wind': '风',
+  'sea': '海',
+  'river': '河',
+  'mountain': '山',
+  'flower': '花',
+  'tree': '树',
+  'bird': '鸟',
+  'night': '夜晚',
+  'day': '白天',
+  'time': '时间',
+  'life': '生活',
+  'friend': '朋友',
+  'home': '家',
+  'city': '城市',
+  'road': '路',
+  'journey': '旅程',
+  'hope': '希望',
+  'peace': '和平',
+  'joy': '快乐',
+  'sad': '悲伤',
+  'happy': '快乐',
+  'alone': '孤独',
+  'together': '一起',
+  'forever': '永远',
+  'never': '从不',
+  'always': '总是',
+  'maybe': '也许',
+  'please': '请',
+  'thank': '谢谢',
+  'sorry': '对不起',
+  'goodbye': '再见',
+  'morning': '早晨',
+  'evening': '晚上',
+  'afternoon': '下午',
+  'winter': '冬天',
+  'summer': '夏天',
+  'spring': '春天',
+  'autumn': '秋天',
+  'blue': '蓝色',
+  'red': '红色',
+  'green': '绿色',
+  'yellow': '黄色',
+  'white': '白色',
+  'black': '黑色',
+  'one': '一',
+  'two': '二',
+  'three': '三',
+  'four': '四',
+  'five': '五',
+  'six': '六',
+  'seven': '七',
+  'eight': '八',
+  'nine': '九',
+  'ten': '十'
+};
+
+// 简单翻译函数：将英文单词翻译成中文
+function translateToChinese(text: string): string {
+  const words = text.toLowerCase().split(/\s+/);
+  const translatedWords = words.map(word => {
+    // 移除标点符号
+    const cleanWord = word.replace(/[^\w]/g, '');
+    return TRANSLATION_MAP[cleanWord] || word;
+  });
+  return translatedWords.join(' ');
+}
+
+// 检查文本是否主要是英文
+function isMostlyEnglish(text: string): boolean {
+  // 简单检查：如果包含中文字符，则不是英文
+  const chineseCharRegex = /[\u4e00-\u9fff]/;
+  return !chineseCharRegex.test(text);
+}
 
 // 从环境变量获取S3配置
 const getEnv = (key: string) => {
@@ -190,9 +281,19 @@ export async function getAllSongs(): Promise<Song[]> {
       const fileName = file.Key?.replace('music/', '').replace('.mp3', '') || `song-${index}`;
       
       // 从文件名生成标题（简单处理：将下划线或连字符替换为空格）
-      const title = fileName
+      let title = fileName
         .replace(/[_-]/g, ' ')
         .replace(/\b\w/g, char => char.toUpperCase());
+      
+      // 自动翻译：如果标题主要是英文，尝试翻译成中文
+      if (isMostlyEnglish(title)) {
+        const translatedTitle = translateToChinese(title);
+        // 如果翻译结果与原文不同，使用翻译后的标题
+        if (translatedTitle !== title.toLowerCase()) {
+          title = translatedTitle;
+          console.log(`已翻译歌名: ${fileName} -> ${title}`);
+        }
+      }
       
       // 生成封面图片URL（使用picsum.photos，基于文件名生成种子）
       const coverSeed = fileName.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -225,6 +326,159 @@ export async function getAllSongs(): Promise<Song[]> {
     return songs;
   } catch (error) {
     console.error('Error fetching songs from S3:', error);
+    // 出错时返回空数组
+    return [];
+  }
+}
+
+/**
+ * 从S3获取所有视频文件并转换为Video对象数组
+ */
+export async function getAllVideos(): Promise<Video[]> {
+  try {
+    const files = await listFiles('videos/');
+    
+    // 过滤出视频文件
+    const videoFiles = files.filter(file => {
+      if (!file.Key) return false;
+      const key = file.Key.toLowerCase();
+      return key.endsWith('.mp4') || key.endsWith('.webm') || key.endsWith('.mov') || 
+             key.endsWith('.avi') || key.endsWith('.mkv');
+    });
+    
+    // 视频描述库
+    const videoDescriptions = [
+      '静谧的深夜港口，船只静静停泊，仿佛时间在此刻凝固。',
+      '雨水打湿了城市的霓虹，车流如织，在这个不眠之夜。',
+      '白雪皑皑的山巅，唯有风声吹过。',
+      '望不到尽头的公路，是我们每个人都在走的平凡之路。',
+      '收录看过的光影，留存此刻的静谧。',
+      '以音为渡，静听人间。',
+      '每一个画面，都有一个故事。',
+      '时光匆匆，岁月静好。',
+      '在茫茫人海中，寻找你的身影。',
+      '雨后的天空，格外清澈。'
+    ];
+    
+    // 将文件转换为Video对象
+    const videos: Video[] = videoFiles.map((file, index) => {
+      const fileName = file.Key?.replace('videos/', '').split('.')[0] || `video-${index}`;
+      
+      // 从文件名生成标题（简单处理：将下划线或连字符替换为空格）
+      let title = fileName
+        .replace(/[_-]/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
+      
+      // 自动翻译：如果标题主要是英文，尝试翻译成中文
+      if (isMostlyEnglish(title)) {
+        const translatedTitle = translateToChinese(title);
+        // 如果翻译结果与原文不同，使用翻译后的标题
+        if (translatedTitle !== title.toLowerCase()) {
+          title = translatedTitle;
+          console.log(`已翻译视频标题: ${fileName} -> ${title}`);
+        }
+      }
+      
+      // 生成缩略图URL（使用picsum.photos，基于文件名生成种子）
+      const thumbnailSeed = fileName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const thumbnailUrl = `https://picsum.photos/seed/${thumbnailSeed}/800/450`;
+      
+      // 获取视频URL
+      const videoUrl = getPublicUrl(file.Key || `videos/${fileName}.mp4`);
+      
+      // 随机选择描述
+      const descriptionIndex = index % videoDescriptions.length;
+      const description = videoDescriptions[descriptionIndex];
+      
+      return {
+        id: `video-${index + 1}`,
+        title: title,
+        thumbnail: thumbnailUrl,
+        videoUrl: videoUrl,
+        description: description
+      };
+    });
+    
+    console.log(`从S3获取了 ${videos.length} 个视频`);
+    return videos;
+  } catch (error) {
+    console.error('Error fetching videos from S3:', error);
+    // 出错时返回空数组
+    return [];
+  }
+}
+
+/**
+ * 读取S3对象的内容
+ */
+async function getObjectContent(key: string): Promise<string> {
+  try {
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+    const response = await s3Client.send(command);
+    const content = await response.Body?.transformToString();
+    return content || '';
+  } catch (error) {
+    console.error(`Error reading object ${key}:`, error);
+    return '';
+  }
+}
+
+/**
+ * 从S3获取所有评论文件并转换为Comment对象数组
+ * 评论文件存储在reping/目录中，格式为JSON
+ */
+export async function getAllComments(): Promise<Comment[]> {
+  try {
+    const files = await listFiles('reping/');
+    
+    // 过滤出.json文件
+    const jsonFiles = files.filter(file => 
+      file.Key && file.Key.toLowerCase().endsWith('.json')
+    );
+    
+    // 读取并解析每个JSON文件
+    const comments: Comment[] = [];
+    for (const file of jsonFiles) {
+      if (!file.Key) continue;
+      
+      try {
+        const content = await getObjectContent(file.Key);
+        if (!content) continue;
+        
+        const commentData = JSON.parse(content);
+        
+        // 验证必需字段
+        if (!commentData.id || !commentData.content || !commentData.category) {
+          console.warn(`Invalid comment format in file ${file.Key}: missing required fields`);
+          continue;
+        }
+        
+        // 确保category是有效的类型
+        const validCategories = ['Regret', 'Growth', 'Heartbeat', 'World', 'Private'];
+        const category = validCategories.includes(commentData.category) 
+          ? commentData.category as 'Regret' | 'Growth' | 'Heartbeat' | 'World' | 'Private'
+          : 'World';
+        
+        comments.push({
+          id: commentData.id,
+          content: commentData.content,
+          songTitle: commentData.songTitle || '',
+          category: category,
+          isPrivate: Boolean(commentData.isPrivate),
+          author: commentData.author || ''
+        });
+      } catch (error) {
+        console.error(`Error parsing comment file ${file.Key}:`, error);
+      }
+    }
+    
+    console.log(`从S3获取了 ${comments.length} 条评论`);
+    return comments;
+  } catch (error) {
+    console.error('Error fetching comments from S3:', error);
     // 出错时返回空数组
     return [];
   }

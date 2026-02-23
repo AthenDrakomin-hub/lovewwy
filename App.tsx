@@ -138,9 +138,9 @@ const App: React.FC = () => {
                   rel="noopener noreferrer"
                   className="block p-4 border border-white/10 rounded-lg hover:border-white/30 transition-all duration-300 hover:bg-white/5 group"
                 >
-                  <div className="text-white group-hover:text-white/90 transition">AI Hub Today</div>
+                  <div className="text-white group-hover:text-white/90 transition">AI每日资讯</div>
                   <div className="text-xs text-white/50 mt-1">https://ai.hubtoday.app/</div>
-                  <div className="text-xs text-white/30 mt-2">探索最新AI工具与资源</div>
+                  <div className="text-xs text-white/30 mt-2">AI发展跟踪</div>
                 </a>
                 <a 
                   href="https://www.trjyy.com/" 
@@ -148,9 +148,9 @@ const App: React.FC = () => {
                   rel="noopener noreferrer"
                   className="block p-4 border border-white/10 rounded-lg hover:border-white/30 transition-all duration-300 hover:bg-white/5 group"
                 >
-                  <div className="text-white group-hover:text-white/90 transition">今日推荐</div>
+                  <div className="text-white group-hover:text-white/90 transition">唐人街影院</div>
                   <div className="text-xs text-white/50 mt-1">https://www.trjyy.com/</div>
-                  <div className="text-xs text-white/30 mt-2">每日精选推荐内容</div>
+                  <div className="text-xs text-white/30 mt-2">免费观影</div>
                 </a>
               </div>
               <p className="text-white/40 text-xs mt-8">更多好物分享，敬请期待...</p>
