@@ -112,13 +112,18 @@ const LonelyCollection: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       
       // 获取上传的歌曲ID并添加到歌单
       const fetchedSongs = await getAllSongs();
-      const newSong = fetchedSongs.find(song => song.url.includes(fileName));
+      // 使用S3 key来查找新上传的歌曲（更可靠）
+      const newSong = fetchedSongs.find(song => song.url === key || song.url.includes(fileName));
       if (newSong) {
         const lonelyPlaylist = JSON.parse(localStorage.getItem('lonelyPlaylist') || '[]');
         if (!lonelyPlaylist.includes(newSong.id)) {
           lonelyPlaylist.push(newSong.id);
           localStorage.setItem('lonelyPlaylist', JSON.stringify(lonelyPlaylist));
+          console.log('歌曲已添加到孤独感集:', newSong.id, newSong.title);
         }
+      } else {
+        console.warn('警告：上传后未找到歌曲，可能需要在getAllSongs中修复歌曲ID生成逻辑');
+        console.log('查找参数:', { key, fileName, fetchedSongsCount: fetchedSongs.length });
       }
       
       // 重新加载歌曲列表
@@ -137,7 +142,20 @@ const LonelyCollection: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
       console.log('文件上传成功:', publicUrl);
     } catch (error) {
-      setUploadError(error instanceof Error ? error.message : '上传失败');
+      console.error('上传失败:', error);
+      let errorMessage = '上传失败';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        // 如果是S3连接错误，提供更友好的提示
+        if (errorMessage.includes('credentials') || errorMessage.includes('AccessDenied') || errorMessage.includes('InvalidAccessKeyId')) {
+          errorMessage = 'S3连接失败：请检查S3配置和凭据是否正确。可以尝试使用"测试S3连接"功能检查配置。';
+        } else if (errorMessage.includes('NoSuchBucket')) {
+          errorMessage = '存储桶不存在：请检查存储桶名称是否正确，或确保存储桶已创建。';
+        } else if (errorMessage.includes('Network Error') || errorMessage.includes('Failed to fetch')) {
+          errorMessage = '网络连接失败：请检查网络连接，或S3端点是否可访问。';
+        }
+      }
+      setUploadError(errorMessage);
       setUploadProgress(0);
     } finally {
       setUploading(false);

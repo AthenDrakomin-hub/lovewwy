@@ -336,15 +336,21 @@ export async function getAllSongs(): Promise<Song[]> {
         lyrics.push(lyricLines[lineIndex]);
       }
       
-      return {
-        id: `s3-${index + 1}`,
-        title: title,
-        artist: artist,
-        cover: coverUrl,
-        url: file.Key || `music/${fileName}.mp3`,
-        lyrics: lyrics,
-        hotComment: hotComment
-      };
+        // 生成稳定的ID：基于文件名而不是索引
+        // 使用文件key的哈希值作为ID，确保同一文件总是有相同的ID
+        const fileKeyForId = file.Key || `music/${fileName}.mp3`;
+        const fileBaseName = fileKey.toLowerCase().replace(/[^a-z0-9.]/g, '-');
+        const songId = `s3-${fileBaseName}`;
+        
+        return {
+          id: songId,
+          title: title,
+          artist: artist,
+          cover: coverUrl,
+          url: fileKeyForId,
+          lyrics: lyrics,
+          hotComment: hotComment
+        };
     });
     
     console.log(`从S3获取了 ${songs.length} 首歌曲`);
