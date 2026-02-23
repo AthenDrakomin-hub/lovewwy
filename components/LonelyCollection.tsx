@@ -224,6 +224,66 @@ const LonelyCollection: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     loadSongs();
   };
 
+  // 将歌曲移动到其他播放列表
+  const moveSongToPlaylist = (songId: string, targetPlaylist: 'lonely' | 'midnight' | 'private') => {
+    try {
+      // 获取当前歌曲
+      const song = songs.find(s => s.id === songId);
+      if (!song) return;
+
+      // 从所有播放列表中移除（如果用户想移动而不是复制）
+      // 如果希望歌曲可以同时属于多个播放列表，可以注释掉这部分
+      const lonelyPlaylist = JSON.parse(localStorage.getItem('lonelyPlaylist') || '[]');
+      const midnightPlaylist = JSON.parse(localStorage.getItem('midnightPlaylist') || '[]');
+      const privatePlaylist = JSON.parse(localStorage.getItem('privatePlaylist') || '[]');
+      
+      // 从当前播放列表移除（如果存在）
+      const updatedLonely = lonelyPlaylist.filter((id: string) => id !== songId);
+      const updatedMidnight = midnightPlaylist.filter((id: string) => id !== songId);
+      const updatedPrivate = privatePlaylist.filter((id: string) => id !== songId);
+      
+      // 添加到目标播放列表
+      if (targetPlaylist === 'lonely' && !updatedLonely.includes(songId)) {
+        updatedLonely.push(songId);
+      } else if (targetPlaylist === 'midnight' && !updatedMidnight.includes(songId)) {
+        updatedMidnight.push(songId);
+      } else if (targetPlaylist === 'private' && !updatedPrivate.includes(songId)) {
+        updatedPrivate.push(songId);
+      }
+      
+      // 保存回localStorage
+      localStorage.setItem('lonelyPlaylist', JSON.stringify(updatedLonely));
+      localStorage.setItem('midnightPlaylist', JSON.stringify(updatedMidnight));
+      localStorage.setItem('privatePlaylist', JSON.stringify(updatedPrivate));
+      
+      console.log(`歌曲 ${song.title} 已移动到 ${targetPlaylist} 播放列表`);
+      
+      // 重新加载歌曲列表
+      loadSongs();
+      
+      // 如果不在目标播放列表页面，提示用户
+      if (targetPlaylist !== 'lonely') {
+        alert(`歌曲已移动到${targetPlaylist === 'midnight' ? '午夜电台' : '私藏珍品'}播放列表。您可以在对应页面查看。`);
+      }
+    } catch (error) {
+      console.error('移动歌曲失败:', error);
+    }
+  };
+
+  // 检查歌曲属于哪些播放列表
+  const getSongPlaylists = (songId: string) => {
+    const lonelyPlaylist = JSON.parse(localStorage.getItem('lonelyPlaylist') || '[]');
+    const midnightPlaylist = JSON.parse(localStorage.getItem('midnightPlaylist') || '[]');
+    const privatePlaylist = JSON.parse(localStorage.getItem('privatePlaylist') || '[]');
+    
+    const playlists = [];
+    if (lonelyPlaylist.includes(songId)) playlists.push('lonely');
+    if (midnightPlaylist.includes(songId)) playlists.push('midnight');
+    if (privatePlaylist.includes(songId)) playlists.push('private');
+    
+    return playlists;
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -421,12 +481,48 @@ const LonelyCollection: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                         className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-white/30"
                         placeholder="艺术家"
                       />
-                      <div className="flex gap-2">
+                      
+                      {/* 快速分类选择 */}
+                      <div className="pt-2">
+                        <p className="text-xs text-[#8A8FB8] mb-2">快速分类：</p>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => moveSongToPlaylist(song.id, 'lonely')}
+                            className={`flex-1 py-2 text-xs rounded-lg transition ${getSongPlaylists(song.id).includes('lonely') ? 'bg-white/20 text-white' : 'bg-white/5 hover:bg-white/10 text-[#8A8FB8]'}`}
+                          >
+                            孤独感集
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveSongToPlaylist(song.id, 'midnight')}
+                            className={`flex-1 py-2 text-xs rounded-lg transition ${getSongPlaylists(song.id).includes('midnight') ? 'bg-white/20 text-white' : 'bg-white/5 hover:bg-white/10 text-[#8A8FB8]'}`}
+                          >
+                            午夜电台
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveSongToPlaylist(song.id, 'private')}
+                            className={`flex-1 py-2 text-xs rounded-lg transition ${getSongPlaylists(song.id).includes('private') ? 'bg-white/20 text-white' : 'bg-white/5 hover:bg-white/10 text-[#8A8FB8]'}`}
+                          >
+                            私藏珍品
+                          </button>
+                        </div>
+                        <p className="text-xs text-[#8A8FB8] mt-2">
+                          当前分类：{getSongPlaylists(song.id).map(p => 
+                            p === 'lonely' ? '孤独感集' : 
+                            p === 'midnight' ? '午夜电台' : 
+                            '私藏珍品'
+                          ).join('、') || '未分类'}
+                        </p>
+                      </div>
+                      
+                      <div className="flex gap-2 pt-2">
                         <button
                           onClick={saveEditSong}
                           className="flex-1 py-2 bg-white/10 hover:bg-white/20 text-xs rounded-lg transition"
                         >
-                          保存
+                          保存标题
                         </button>
                         <button
                           onClick={cancelEditSong}

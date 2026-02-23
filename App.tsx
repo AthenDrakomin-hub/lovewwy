@@ -106,7 +106,17 @@ const App: React.FC = () => {
   const renderView = () => {
     switch(currentView) {
       case 'home': return <Hero onStartListening={() => setCurrentView('player')} onGoToWall={() => setCurrentView('wall')} />;
-      case 'player': return <PlayerPage song={currentSong} isPlaying={isPlaying} onSelectSong={selectSong} onTogglePlay={togglePlay} />;
+      case 'player': return <PlayerPage 
+        song={currentSong} 
+        isPlaying={isPlaying} 
+        onSelectSong={selectSong} 
+        onTogglePlay={togglePlay}
+        onNavigateToPlaylist={(playlist) => {
+          if (playlist === 'lonely') setCurrentView('lonely');
+          else if (playlist === 'midnight') setCurrentView('midnight');
+          else if (playlist === 'private') setCurrentView('private');
+        }}
+      />;
       case 'wall': return <CommentWall />;
       case 'video': return <VideoCollection />;
       case 'private': return <PrivateCollection />;
